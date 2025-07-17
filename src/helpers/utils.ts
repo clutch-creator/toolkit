@@ -75,3 +75,18 @@ export function cloneChildren(children, { ...props }) {
     ? children.map(cloneChild)
     : cloneChild(children);
 }
+
+export const shallowEqual = (
+  obj1: Record<string, any> | undefined,
+  obj2: Record<string, any> | undefined
+): boolean => {
+  if (obj1 === obj2) return true;
+  if (!obj1 || !obj2) return obj1 === obj2;
+
+  const keys1 = Object.keys(obj1);
+  const keys2 = Object.keys(obj2);
+
+  if (keys1.length !== keys2.length) return false;
+
+  return !keys1.some(key => obj1[key] !== obj2[key]);
+};
