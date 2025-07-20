@@ -1,206 +1,144 @@
-import { create } from "zustand";
+import { create } from 'zustand';
+import { logger } from '../helpers/logger.js';
+import { instanceSelector } from './selectors.js';
+import {
+  TInstanceState,
+  TSelection,
+  TStore,
+  TStoreInstances,
+} from './types.js';
 
-type TActionsMap = { [instanceId: string]: Map<string, Function> };
-type TStatesMap = {
-  [instanceId: string]: { [name: string]: string | boolean | number };
-};
-type TStateMap = { [instanceId: string]: unknown };
+const operateInstance = (
+  instances: TStoreInstances,
+  selection: TSelection,
+  instance: TInstanceState
+): TStoreInstances => {
+  const { instanceId, serializedScope, serializedKeys } = selection;
 
-export type TClutchStore = {
-  actions: TActionsMap;
-  actionsState: TStateMap;
-  states?: TStatesMap;
-  onSelect?: Function;
-  onSelectActiveTrail?: boolean;
-  // Actions
-  registerAction: (
-    instanceId: string,
-    actionName: string,
-    action: Function,
-    props?: Record<string, unknown>,
-    styleSelectors?: { id: string; value: string; selector: string }[],
-    wrapperComponent?: React.FunctionComponent,
-  ) => void;
-  unregisterAction: (instanceId: string, actionName: string) => void;
-  setActionsState: (instanceId: string, state: unknown) => void;
-  registerState?: <T>(instanceId: string, name: string, value: T) => void;
-  unregisterState?: (instanceId: string, name: string) => void;
-  getAction?: (instanceId: string, actionName: string) => Function;
-  setOnSelect: (onSelect: Function) => void;
-  setOnSelectActiveTrail: (ignoreTrail: boolean) => void;
+  return {
+    ...instances,
+    [serializedScope]: {
+      ...instances[serializedScope],
+      [instanceId]: {
+        ...instances[serializedScope]?.[instanceId],
+        [serializedKeys]: instance,
+      },
+    },
+  };
 };
 
-export const storeFactory = (set): TClutchStore => ({
-  actions: {},
-  actionsState: {},
-  states: {},
-  onSelect: undefined,
-  registerAction: (
-    instanceId,
-    actionName,
-    action,
-    extraProps,
-    styleSelectors,
-    wrapperComponent,
-  ) => {
-    set((state) => {
-      if (
-        !actionName ||
-        !action ||
-        (state.actions[instanceId]?.has(actionName) &&
-          state.actions[instanceId].get(actionName) === action)
-      )
-        return state;
+const getInstance = (state: TStore, selection: TSelection): TInstanceState => {
+  const instance = instanceSelector(state, selection);
 
-      const targetMap = new Map(state.actions[instanceId]);
+  if (!instance) {
+    return {
+      actions: {},
+      states: {},
+      select: {},
+    };
+  }
 
-      if (window.CLUTCH_DEBUG)
-        console.log(
-          "[CLUTCH_CONTEXT] Registered Action",
-          instanceId,
-          actionName,
-          action,
-        );
+  return instance;
+};
 
-      targetMap.set(actionName, {
-        action,
-        extraProps,
-        styleSelectors,
-        wrapperComponent,
+export const useStore = create<TStore>((set, get) => ({
+  instances: {},
+
+  registerAction: (selection, options) => {
+    const { actionName } = options;
+
+    set(state => {
+      logger.log('Registered Action', selection, options);
+
+      const instance = getInstance(state, selection);
+
+      const newInstances = operateInstance(state.instances, selection, {
+        ...instance,
+        actions: {
+          ...instance.actions,
+          [actionName]: options,
+        },
       });
 
-      return {
-        ...state,
-        actions: {
-          ...state.actions,
-          [instanceId]: targetMap,
-        },
-      };
+      return { instances: newInstances };
     });
   },
-  unregisterAction: (instanceId, actionName) => {
-    set((state) => {
-      if (!actionName || !state.actions[instanceId]?.has(actionName))
-        return state;
 
-      const targetMap: Map<string, Function> = new Map(
-        state.actions[instanceId],
-      );
+  registerState: (selection, name, value) => {
+    set(state => {
+      logger.log('Registered State', selection, name, value);
 
-      if (window.CLUTCH_DEBUG)
-        console.log("[CLUTCH_CONTEXT] Removed Action", instanceId, actionName);
+      const instance = getInstance(state, selection);
 
-      const result = {
-        ...state,
-        actions: {
-          ...state.actions,
-          [instanceId]: targetMap,
-        },
-      };
-
-      targetMap.delete(actionName);
-
-      if (targetMap.size === 0) {
-        delete result.actions[instanceId];
-      }
-
-      return result;
-    });
-  },
-  setActionsState: (instanceId, state) => {
-    set((prevState) => {
-      if (prevState.actionsState[instanceId] === state) return state;
-
-      if (window.CLUTCH_DEBUG)
-        console.log("[CLUTCH_CONTEXT] Set Action State", instanceId, state);
-
-      const newState = { ...prevState.actionsState, [instanceId]: state };
-
-      if (state === undefined) {
-        delete newState[instanceId];
-      }
-
-      return {
-        ...prevState,
-        actionsState: newState,
-      };
-    });
-  },
-  registerState: (instanceId, name, value) => {
-    set((state) => {
-      if (
-        !name ||
-        (state.states[instanceId] &&
-          name in state.states[instanceId] &&
-          state.states[instanceId][name] === value)
-      )
-        return state;
-
-      if (window.CLUTCH_DEBUG)
-        console.log(
-          "[CLUTCH_CONTEXT] Registered State",
-          instanceId,
-          name,
-          value,
-        );
-
-      return {
-        ...state,
+      const newInstances = operateInstance(state.instances, selection, {
+        ...instance,
         states: {
-          ...state.states,
+          ...instance.states,
+          [name]: value,
+        },
+      });
+
+      return { instances: newInstances };
+    });
+  },
+
+  registerSelect: (selection, handler, activeTrail) => {
+    // select dont need to update store state
+    const instance = instanceSelector(get(), selection);
+
+    if (!instance) {
+      set(state => {
+        const newInstances = operateInstance(state.instances, selection, {
+          actions: {},
+          states: {},
+          select: {
+            handler,
+            activeTrail,
+          },
+        });
+
+        return { instances: newInstances };
+      });
+    } else {
+      instance.select.handler = handler;
+      instance.select.activeTrail = activeTrail;
+    }
+  },
+
+  unregisterInstance: selection => {
+    set(state => {
+      logger.log('Unregistered Instance', selection);
+
+      const instance = instanceSelector(state, selection);
+
+      if (!instance) {
+        logger.warn(`No instance found`, selection);
+        return state;
+      }
+
+      const instances = state.instances;
+      const { instanceId, serializedScope, serializedKeys } = selection;
+
+      const newInstances = {
+        ...instances,
+        [serializedScope]: {
+          ...instances[serializedScope],
           [instanceId]: {
-            ...(state.states[instanceId] || {}),
-            [name]: value,
+            ...instances[serializedScope]?.[instanceId],
           },
         },
       };
-    });
-  },
-  unregisterState: (instanceId, name) => {
-    set((state) => {
-      if (!state.states[instanceId] || !(name in state.states[instanceId]))
-        return state;
 
-      if (window.CLUTCH_DEBUG)
-        console.log("[CLUTCH_CONTEXT] Removed State", instanceId, name);
+      delete newInstances[serializedScope]?.[instanceId]?.[serializedKeys];
 
-      const result = {
-        ...state,
-        states: {
-          ...state.states,
-          [instanceId]: { ...state.states[instanceId] },
-        },
-      };
-
-      delete result.states[instanceId][name];
-
-      if (Object.keys(result.states[instanceId]).length === 0) {
-        delete result.states[instanceId];
+      if (
+        Object.keys(newInstances[serializedScope]?.[instanceId] || {})
+          .length === 0
+      ) {
+        delete newInstances[serializedScope]?.[instanceId];
       }
 
-      return result;
+      return { instances: newInstances };
     });
   },
-  setOnSelect: (onSelect) => {
-    set((state) => {
-      if (state.onSelect === onSelect) return state;
-
-      return {
-        ...state,
-        onSelect,
-      };
-    });
-  },
-  setOnSelectActiveTrail: (activeTrail) => {
-    set((state) => {
-      if (state.onSelectActiveTrail === activeTrail) return state;
-
-      return {
-        ...state,
-        onSelectActiveTrail: activeTrail,
-      };
-    });
-  },
-});
-
-export const useClutchStore = create<TClutchStore>((set) => storeFactory(set));
+}));

@@ -1,6 +1,14 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useRef } from 'react';
 
-export const getEntryInstanceId = (properties, entryInstances) => {
+type AnyFunction = (...args: any[]) => any;
+
+/**
+ * Finds the entry instance that matches the given properties or returns the first entry if no match is found.
+ */
+export const getEntryInstanceId = (
+  properties: Record<string, any>,
+  entryInstances: Array<{ id: string; variantIds?: Record<string, any> }>
+): string | undefined => {
   const entry =
     entryInstances.find(entry => {
       const entryVariants = entry.variantIds || {};
@@ -13,7 +21,14 @@ export const getEntryInstanceId = (properties, entryInstances) => {
   return entry?.id;
 };
 
-function mergeProps(slotProps, childProps) {
+/**
+ * Merges slot props with child props, handling special cases for event handlers, styles, and className.
+ * Event handlers are chained, styles are merged as objects, and classNames are concatenated.
+ */
+function mergeProps(
+  slotProps: Record<string, any>,
+  childProps: Record<string, any>
+): Record<string, any> {
   const overrideProps = { ...childProps };
 
   for (const propName in childProps) {
@@ -23,7 +38,7 @@ function mergeProps(slotProps, childProps) {
 
     if (isHandler) {
       if (slotPropValue && childPropValue) {
-        overrideProps[propName] = (...args) => {
+        overrideProps[propName] = (...args: any[]) => {
           childPropValue(...args);
           slotPropValue(...args);
         };
@@ -42,7 +57,14 @@ function mergeProps(slotProps, childProps) {
   return { ...slotProps, ...overrideProps };
 }
 
-export function cloneChildren(children, { ...props }) {
+/**
+ * Clones React children and applies the given props to each child element.
+ * Filters out debug-related props and handles both single children and arrays of children.
+ */
+export function cloneChildren(
+  children: React.ReactNode,
+  props: Record<string, any>
+): React.ReactNode {
   if (Object.keys(props).length === 0) {
     return children;
   }
@@ -56,7 +78,7 @@ export function cloneChildren(children, { ...props }) {
   delete props['debug-name'];
   delete props['data-d'];
 
-  const cloneChild = useCallback((child, index = undefined) => {
+  const cloneChild = (child: React.ReactNode, index?: number) => {
     if (React.isValidElement(child)) {
       const clonedElement = React.cloneElement(child, {
         key: index,
@@ -69,13 +91,17 @@ export function cloneChildren(children, { ...props }) {
     } else {
       return child;
     }
-  }, []);
+  };
 
   return Array.isArray(children)
     ? children.map(cloneChild)
     : cloneChild(children);
 }
 
+/**
+ * Performs a shallow comparison between two objects to determine if they are equal.
+ * Only compares the first level of properties, not nested objects.
+ */
 export const shallowEqual = (
   obj1: Record<string, any> | undefined,
   obj2: Record<string, any> | undefined
@@ -89,4 +115,21 @@ export const shallowEqual = (
   if (keys1.length !== keys2.length) return false;
 
   return !keys1.some(key => obj1[key] !== obj2[key]);
+};
+
+/**
+ * A React hook that creates a stable callback reference that always calls the latest version
+ * of the provided callback. Useful for avoiding unnecessary re-renders when passing callbacks
+ * to child components while ensuring the callback always has access to the latest closure values.
+ */
+export const useEvent = <TCallback extends AnyFunction>(
+  callback: TCallback
+): TCallback => {
+  const ref = useRef<TCallback>(callback);
+
+  ref.current = callback;
+
+  return useCallback((...args: Parameters<TCallback>) => {
+    return ref.current(...args);
+  }, []) as TCallback;
 };

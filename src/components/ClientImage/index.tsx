@@ -1,8 +1,12 @@
-
 'use client';
-import React, { use, cloneElement } from 'react';
+import React, { cloneElement, use } from 'react';
 
-export const ClientImage = ({ children, ...props }: { children: React.ReactNode }) => {
+export const ClientImage = ({
+  children,
+  ...props
+}: {
+  children: React.ReactNode;
+}) => {
   const child =
     children?.$$typeof === Symbol.for('react.lazy')
       ? use(children._payload)

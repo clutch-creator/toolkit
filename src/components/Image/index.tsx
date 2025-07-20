@@ -1,5 +1,5 @@
-import { default as NextImage } from "next/image";
-import { getImageInfo } from "./utils.ts";
+import { default as NextImage } from 'next/image';
+import { getImageInfo } from './utils';
 
 type TClutchImageProps = {
   src: string;
@@ -11,26 +11,26 @@ type TClutchImageProps = {
   placeholder?: string;
   loading?: string;
   className?: string;
-  "data-d"?: string;
+  'data-d'?: string;
 };
 
 export async function Image({
   src,
   className,
   placeholder,
-  sizes = "100vw",
+  sizes = '100vw',
   ...props
 }: TClutchImageProps) {
   if (!src) return null;
 
   const { width, height, format, blurDataURL } =
-    typeof src === "string" ? await getImageInfo(src) : src;
+    typeof src === 'string' ? await getImageInfo(src) : src;
 
-  let placeholderVal = placeholder ? "blur" : "empty";
+  let placeholderVal = placeholder ? 'blur' : 'empty';
   const size = width + height;
 
-  if (placeholder === undefined && format !== "svg" && size > 80) {
-    placeholderVal = "blur";
+  if (placeholder === undefined && format !== 'svg' && size > 80) {
+    placeholderVal = 'blur';
   }
 
   return (

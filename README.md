@@ -1,2 +1,3 @@
-# core
-Core components and utils used in clutch projects
+# Clutch Toolkit
+
+Components and utils used in clutch projects
