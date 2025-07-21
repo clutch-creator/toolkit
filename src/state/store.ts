@@ -190,3 +190,5 @@ export const useStore = create<TStore>((set, get) => ({
     });
   },
 }));
+
+export const store = useStore;

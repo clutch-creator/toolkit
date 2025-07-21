@@ -30,7 +30,7 @@
   "scripts": {
     "build:swc": "swc src --out-dir dist --config-file ./.swcrc --delete-dir-on-start --strip-leading-paths",
     "build:tsc": "tsc --emitDeclarationOnly --outDir dist",
-    "build": "build:swc && build:tsc",
+    "build": "bun run build:swc && bun run build:tsc",
     "dev": "bun run build:swc --watch",
     "lint": "eslint .",
     "format": "prettier --write .",
@@ -39,7 +39,8 @@
     "check-types:watch": "tsc --noEmit --watch",
     "changeset": "changeset",
     "version-packages": "changeset version",
-    "release": "bun run build && changeset publish"
+    "release": "bun run build && changeset publish",
+    "test": "echo 'No tests specified' && exit 0"
   },
   "dependencies": {
     "@swc/helpers": "^0.5.17",

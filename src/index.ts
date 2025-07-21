@@ -11,4 +11,4 @@ export {
   useRegisterAction,
   useRegisterSelect,
   useRegisterState,
-} from './state';
+} from './state/index.js';

@@ -92,6 +92,7 @@ export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
   const { serializedScope } = useContext(StateScopeContext);
   const { keys } = useContext(StateKeyContext);
 
+  // Debugging rellies on this memo to be in this first position
   const keyId = useMemo(() => {
     uniqueIdCounter += 1;
 
@@ -146,6 +147,8 @@ export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
 
   return clonedChildren;
 };
+
+StateKey.displayName = 'StateKey';
 
 type TStateIdProps = {
   children: React.ReactNode;
