@@ -20,6 +20,7 @@
     "./state": "./dist/state/index.js",
     "./sitemap": "./dist/sitemap/index.js",
     "./server": "./dist/server/index.js",
+    "./utils": "./dist/utils/index.js",
     "./next/*": "./dist/next/*"
   },
   "type": "module",
@@ -44,7 +45,7 @@
   "dependencies": {
     "@swc/helpers": "^0.5.17",
     "zustand": "^5.0.3",
-    "qs": "^6.14.0",
+    "qs-esm": "^7.0.2",
     "plaiceholder": "^3.0.0"
   },
   "devDependencies": {

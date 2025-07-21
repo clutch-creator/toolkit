@@ -1,6 +1,18 @@
-import React, { useCallback, useRef } from 'react';
+import React from 'react';
 
-type AnyFunction = (...args: any[]) => any;
+/**
+ * Configuration function for Clutch Elements
+ *
+ * @param element The React Component to be used in Clutch
+ * @param config Additional information about the component
+ */
+export const clutchElementConfig = (
+  element: React.FunctionComponent,
+  config: {
+    icon?: string;
+    styleSelectors?: { name?: string; value: string }[];
+  }
+) => undefined;
 
 /**
  * Finds the entry instance that matches the given properties or returns the first entry if no match is found.
@@ -115,21 +127,4 @@ export const shallowEqual = (
   if (keys1.length !== keys2.length) return false;
 
   return !keys1.some(key => obj1[key] !== obj2[key]);
-};
-
-/**
- * A React hook that creates a stable callback reference that always calls the latest version
- * of the provided callback. Useful for avoiding unnecessary re-renders when passing callbacks
- * to child components while ensuring the callback always has access to the latest closure values.
- */
-export const useEvent = <TCallback extends AnyFunction>(
-  callback: TCallback
-): TCallback => {
-  const ref = useRef<TCallback>(callback);
-
-  ref.current = callback;
-
-  return useCallback((...args: Parameters<TCallback>) => {
-    return ref.current(...args);
-  }, []) as TCallback;
 };

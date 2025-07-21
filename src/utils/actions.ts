@@ -1,5 +1,5 @@
-
-import qs from 'qs';
+import type { NextRouter } from 'next/router.js';
+import * as qs from 'qs-esm';
 
 function deepMerge(target, source) {
   for (const key in source) {
@@ -11,13 +11,13 @@ function deepMerge(target, source) {
   return target;
 }
 
-export const updateUrlSearchParams = (data, router) => {
+export const updateUrlSearchParams = (newParams, router: NextRouter) => {
   // Parse the current URL
   const url = new URL(window.location.href);
 
-  // Merge current search params with new data
+  // Merge current search params with new newParams
   const currentParams = qs.parse(url.search, { ignoreQueryPrefix: true });
-  const updatedParams = deepMerge({ ...currentParams }, data);
+  const updatedParams = deepMerge({ ...currentParams }, newParams);
 
   // Remove any undefined or null values from updatedParams
   Object.keys(updatedParams).forEach(key => {

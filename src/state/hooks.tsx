@@ -1,3 +1,5 @@
+'use client';
+
 import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
 import { cloneChildren, shallowEqual } from '../helpers/utils.js';
 import {

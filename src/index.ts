@@ -1,18 +1,15 @@
-import React from 'react';
+// Only export the necessary parts of the module for user consumption
+// Other functions will have more specific exports
 
-/**
- * Configuration function for Clutch Elements
- *
- * @param element The React Component to be used in Clutch
- * @param config Additional information about the component
- */
-export const clutchElementConfig = (
-  element: React.FunctionComponent,
-  config: {
-    icon?: string;
-    styleSelectors?: { name?: string; value: string }[];
-  }
-) => undefined;
+export * from './utils/actions.js';
+export * from './utils/controls.js';
+export * from './utils/errors.js';
+export { clutchElementConfig } from './utils/helpers.js';
+export * from './utils/hooks.js';
+export * from './utils/logger.js';
 
-export * from './helpers';
-export * from './state';
+export {
+  useRegisterAction,
+  useRegisterSelect,
+  useRegisterState,
+} from './state';
