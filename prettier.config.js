@@ -11,10 +11,10 @@ const config = {
   singleQuote: true,
 
   // Only add quotes around object properties when necessary
-  quoteProps: "as-needed",
+  quoteProps: 'as-needed',
 
   // No trailing commas for better compatibility
-  trailingComma: "es5",
+  trailingComma: 'es5',
 
   // Use semicolons
   semi: true,
@@ -26,16 +26,16 @@ const config = {
   bracketSpacing: true,
 
   // Arrow function parentheses
-  arrowParens: "avoid",
+  arrowParens: 'avoid',
 
   // End of line
-  endOfLine: "lf",
+  endOfLine: 'lf',
 
   // Embedded language formatting
-  embeddedLanguageFormatting: "auto",
+  embeddedLanguageFormatting: 'auto',
 
   // HTML whitespace sensitivity
-  htmlWhitespaceSensitivity: "css",
+  htmlWhitespaceSensitivity: 'css',
 
   // JSX settings
   jsxSingleQuote: true,
@@ -44,20 +44,20 @@ const config = {
   // Override for specific file types
   overrides: [
     {
-      files: ["*.json", "*.jsonc"],
+      files: ['*.json', '*.jsonc'],
       options: {
         useTabs: false,
         tabWidth: 2,
       },
     },
     {
-      files: ["*.md", "*.mdx"],
+      files: ['*.md', '*.mdx'],
       options: {
-        proseWrap: "preserve",
+        proseWrap: 'preserve',
       },
     },
     {
-      files: ["*.yml", "*.yaml"],
+      files: ['*.yml', '*.yaml'],
       options: {
         useTabs: false,
         tabWidth: 2,
