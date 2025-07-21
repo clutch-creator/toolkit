@@ -9,7 +9,7 @@ import {
 } from './contexts.js';
 import { closestInstanceSelector } from './selectors.js';
 import { useStore } from './store.js';
-import { TActionData } from './types.js';
+import { TActionData, TInstanceState } from './types.js';
 
 const useSelection = () => {
   const scopeContext = useContext(StateScopeContext);
@@ -137,15 +137,15 @@ export const useRegisterSelect = (
   return null;
 };
 
-type TPropertyPath = (string | number)[];
-
-export const useStateValue = (instanceId, sel: TPropertyPath) => {
+export const useStateValue = (
+  instanceId: string,
+  sel: (instanceState: TInstanceState | undefined) => unknown
+) => {
   const selection = useSelection();
-  const value = useStore(state =>
-    getInstanceState(state, serializedScope, keys, propertyPath)
-  );
 
-  return value;
+  return useStore(state =>
+    sel(closestInstanceSelector(state, selection, instanceId))
+  );
 };
 
 export const useActionState = (
