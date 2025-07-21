@@ -22,11 +22,12 @@ export type TActionData = {
 };
 
 export type TInstanceState = {
-  actions: Record<string, TActionData>;
-  states: Record<string, unknown>;
-  actionsState: {
+  actions?: Record<string, TActionData>;
+  states?: Record<string, unknown>;
+  actionsState?: {
     [eventName: string]: {
-      [actionName: string]: Record<string, unknown>;
+      isLoading?: boolean;
+      [actionName: string]: unknown;
     };
   };
   select: { handler?: Function; activeTrail?: boolean };
@@ -54,4 +55,17 @@ export type TStore = {
   ) => void;
 
   unregisterInstance: (selection: TSelection) => void;
+
+  setEventLoading: (
+    selection: TSelection,
+    eventName: string,
+    isLoading: boolean
+  ) => void;
+
+  setEventActionResult: (
+    selection: TSelection,
+    eventName: string,
+    actionName: string,
+    result: unknown
+  ) => void;
 };

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import { logger } from '../helpers/logger.js';
+import { logger } from '../utils/logger.js';
 import { instanceSelector } from './selectors.js';
 import {
   TInstanceState,
@@ -137,6 +137,53 @@ export const useStore = create<TStore>((set, get) => ({
       ) {
         delete newInstances[serializedScope]?.[instanceId];
       }
+
+      return { instances: newInstances };
+    });
+  },
+
+  setEventLoading: (
+    selection: TSelection,
+    eventName: string,
+    isLoading: boolean
+  ) => {
+    set(state => {
+      const instance = getInstance(state, selection);
+
+      const newInstances = operateInstance(state.instances, selection, {
+        ...instance,
+        actionsState: {
+          ...instance.actionsState,
+          [eventName]: {
+            ...instance.actionsState?.[eventName],
+            isLoading,
+          },
+        },
+      });
+
+      return { instances: newInstances };
+    });
+  },
+
+  setEventActionResult: (
+    selection: TSelection,
+    eventName: string,
+    actionName: string,
+    result: unknown
+  ) => {
+    set(state => {
+      const instance = getInstance(state, selection);
+
+      const newInstances = operateInstance(state.instances, selection, {
+        ...instance,
+        actionsState: {
+          ...instance.actionsState,
+          [eventName]: {
+            ...instance.actionsState?.[eventName],
+            [actionName]: result,
+          },
+        },
+      });
 
       return { instances: newInstances };
     });

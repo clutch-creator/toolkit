@@ -1,7 +1,7 @@
 'use client';
 
 import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
-import { cloneChildren, shallowEqual } from '../helpers/utils.js';
+import { cloneChildren, shallowEqual } from '../utils/helpers.js';
 import {
   StateIdContext,
   StateKeyContext,
@@ -94,7 +94,8 @@ export const useRegisterAction = <T extends Function>(
         actionName,
         extraProps,
         wrapperComponent,
-        static: staticOptions.current,
+        action: staticOptions.current.action,
+        styleSelectors: staticOptions.current.styleSelectors,
       });
     }
 
@@ -165,55 +166,66 @@ export const useActionState = (
 /**
  * Registers an instance that contains events, handles all logic around extra props, wrappers, etc
  */
-export const useEventsInstance = (id, { children, ...props }) => {
+export const useEventsInstance = (
+  instanceId: string,
+  {
+    children,
+    ...props
+  }: {
+    children: React.ReactNode;
+    [key: string]: unknown;
+  }
+) => {
   const parentSelection = useSelection();
   const selection = useMemo(() => {
     return {
       ...parentSelection,
-      instanceId: id,
+      instanceId: instanceId,
     };
-  }, [parentSelection, id]);
-  const ref = useRef({
-    extraProps: {},
-    wrappers: [],
-    styleSelectors: [],
-    props,
-  });
+  }, [parentSelection, instanceId]);
 
-  ref.current.extraProps = {};
-  ref.current.wrappers = [];
-  ref.current.styleSelectors = [];
-  ref.current.props = props;
+  const extraProps: Record<string, unknown> = {};
+  const wrappers: React.FunctionComponent[] = [];
+  const styleSelectors: { name: string; value: string }[] = [];
+
+  const setEventLoading = useStore(state => state.setEventLoading);
+  const setEventActionResult = useStore(state => state.setEventActionResult);
 
   const setLoading = (eventName: string, isLoading: boolean) => {
     // This function would set the loading state for the action
     // It could be implemented using a state management solution or context
+    setEventLoading(selection, eventName, isLoading);
   };
 
   // adds component actions used in the events in this instance
-  const addActionState = (actionState: string) => {
-    Object.assign(ref.current.extraProps, actionState.extraProps);
+  const addActionState = (actionState: TActionData) => {
+    Object.assign(extraProps, actionState.extraProps);
 
     if (actionState?.wrapperComponent)
-      ref.current.wrappers.push(actionState.wrapperComponent);
+      wrappers.push(actionState.wrapperComponent);
 
     if (actionState?.styleSelectors)
-      ref.current.styleSelectors.push(...actionState.styleSelectors);
+      styleSelectors.push(...actionState.styleSelectors);
   };
 
-  const runAction = (
+  const runAction = async (
     eventName: string,
     actionName: string,
     actionFn: () => Promise<unknown>
   ) => {
-    // 1. set event action to loading
-    // 2. run the action function with error handling
-    // 3. set event action to success or error based on the result
+    try {
+      const res = await actionFn();
+
+      setEventActionResult(selection, eventName, actionName, res);
+    } catch (error) {
+      setEventActionResult(selection, eventName, actionName, {
+        error: error?.toString(),
+      });
+      throw error;
+    }
   };
 
   const render = (events: Record<string, Function>) => {
-    const { wrappers, extraProps, props } = ref.current;
-
     let res = cloneChildren(children, {
       ...extraProps,
       ...props,
