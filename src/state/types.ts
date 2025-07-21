@@ -15,9 +15,9 @@ export type TSelection = TStateScopeContext &
 
 export type TActionData = {
   actionName: string;
-  action: Function;
+  action: (...args: unknown[]) => unknown;
   styleSelectors?: { name: string; value: string }[];
-  extraProps?: Record<string, any>;
+  extraProps?: Record<string, unknown>;
   wrapperComponent?: React.FunctionComponent;
 };
 
@@ -30,7 +30,10 @@ export type TInstanceState = {
       [actionName: string]: unknown;
     };
   };
-  select: { handler?: Function; activeTrail?: boolean };
+  select: {
+    handler?: (shouldBeVisible: boolean) => void;
+    activeTrail?: boolean;
+  };
 };
 
 export type TStoreInstances = {
@@ -50,7 +53,7 @@ export type TStore = {
 
   registerSelect: (
     selection: TSelection,
-    handler: Function,
+    handler: (shouldBeVisible: boolean) => void,
     activeTrail: boolean
   ) => void;
 

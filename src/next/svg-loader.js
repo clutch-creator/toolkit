@@ -1,3 +1,5 @@
+/* eslint-disable */
+
 const { transform } = require('@svgr/core');
 const jsx = require('@svgr/plugin-jsx');
 const svgo = require('@svgr/plugin-svgo');

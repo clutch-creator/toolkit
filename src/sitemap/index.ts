@@ -25,8 +25,8 @@ export function parseSitemap(
     return [];
   }
 
-  return sitemap.reduce((acc, item) => {
-    let resultUrl = pagePath;
+  return sitemap.reduce<MetadataRoute.Sitemap>((acc, item) => {
+    let resultUrl = pagePath || '';
 
     if (!item.url || typeof item.url !== 'object' || Array.isArray(item.url)) {
       return acc;

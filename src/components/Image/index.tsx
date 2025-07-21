@@ -9,10 +9,12 @@ type TClutchImageProps = {
   quality?: number;
   priority?: boolean;
   placeholder?: string;
-  loading?: string;
+  loading?: 'eager' | 'lazy' | undefined;
   className?: string;
   'data-d'?: string;
 };
+
+type PlaceholderValue = 'blur' | 'empty' | `data:image/${string}`;
 
 export async function Image({
   src,
@@ -26,7 +28,7 @@ export async function Image({
   const { width, height, format, blurDataURL } =
     typeof src === 'string' ? await getImageInfo(src) : src;
 
-  let placeholderVal = placeholder ? 'blur' : 'empty';
+  let placeholderVal: PlaceholderValue = placeholder ? 'blur' : 'empty';
   const size = width + height;
 
   if (placeholder === undefined && format !== 'svg' && size > 80) {

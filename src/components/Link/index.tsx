@@ -3,6 +3,15 @@
 import { default as NextLink } from 'next/link';
 import { usePathname, useSearchParams } from 'next/navigation';
 import React, { Suspense, useCallback, useMemo } from 'react';
+import { TComplexUrl, TParam } from './types.js';
+
+type TParamsLinkProps = {
+  href: string;
+  replaceParams?: boolean;
+  toggleParams?: boolean;
+  params: TParam[];
+  children: (props: { calculatedHref: string }) => React.ReactNode;
+};
 
 const ParamsLink = ({
   href = '',
@@ -10,7 +19,7 @@ const ParamsLink = ({
   toggleParams,
   params,
   children,
-}) => {
+}: TParamsLinkProps) => {
   const searchParams = useSearchParams();
 
   const calculatedHref = useMemo(() => {
@@ -43,6 +52,17 @@ const ParamsLink = ({
   return children({ calculatedHref });
 };
 
+type TAriaAttributes = Record<string, string | boolean>;
+
+type TLinkProps = {
+  className?: string;
+  children: React.ReactNode;
+  disabled?: boolean;
+  download?: boolean;
+  href: TComplexUrl;
+  [key: string]: unknown;
+};
+
 export function Link({
   className,
   children,
@@ -50,38 +70,24 @@ export function Link({
   download,
   href = '',
   ...props
-}: {
-  className?: string;
-  children: React.ReactNode;
-  disabled?: boolean;
-  download?: boolean;
-  href:
-    | string
-    | {
-        url: string;
-        params?: Record<string, string>[];
-        toggleParams?: boolean;
-        replaceParams?: boolean;
-      };
-  [key: string]: any;
-}) {
+}: TLinkProps) {
   const isUsingLinkDirectly = typeof href === 'string';
   let safeHref = isUsingLinkDirectly ? href : '';
   let replaceParams = false;
   let toggleParams = false;
-  let params = [];
+  let params: TParam[] = [];
 
   if (!isUsingLinkDirectly && typeof href === 'object') {
-    replaceParams = href.replaceParams;
-    toggleParams = href.toggleParams;
-    params = href.params;
+    replaceParams = href.replaceParams || false;
+    toggleParams = href.toggleParams || false;
+    params = href.params || [];
     safeHref = href.url;
   }
 
   const currentPathname = usePathname();
 
   const onClick = useCallback(
-    event => {
+    (event: React.MouseEvent<HTMLAnchorElement>) => {
       if (disabled) {
         event.preventDefault();
       }
@@ -89,8 +95,8 @@ export function Link({
     [disabled]
   );
 
-  const ariaAttributes: Record<string, any> = useMemo(() => {
-    const ariaAttributes = {};
+  const ariaAttributes: TAriaAttributes = useMemo(() => {
+    const ariaAttributes: TAriaAttributes = {};
 
     const isActive =
       currentPathname === (safeHref || currentPathname).split('?')[0];
@@ -110,7 +116,6 @@ export function Link({
     return (
       <a
         {...ariaAttributes}
-        ref={ref}
         className={className}
         href={disabled ? undefined : safeHref}
         role={disabled ? 'link' : undefined}
@@ -128,7 +133,6 @@ export function Link({
       <a
         {...ariaAttributes}
         role='link'
-        ref={ref}
         className={className}
         onClick={onClick}
         {...props}
@@ -147,7 +151,7 @@ export function Link({
         onClick={onClick}
         download={download}
         {...props}
-        prefetch={props.prefetch ?? false}
+        prefetch={!!props.prefetch}
       >
         {children}
       </NextLink>
@@ -169,7 +173,7 @@ export function Link({
             onClick={onClick}
             href={calculatedHref}
             {...props}
-            prefetch={props.prefetch ?? false}
+            prefetch={!!props.prefetch}
           >
             {children}
           </NextLink>

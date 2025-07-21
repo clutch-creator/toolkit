@@ -13,7 +13,6 @@
     "NextJs",
     "clutch"
   ],
-  "main": "dist/index.js",
   "exports": {
     ".": "./dist/index.js",
     "./components/*": "./dist/components/*/index.js",
@@ -25,7 +24,7 @@
   },
   "type": "module",
   "files": [
-    "src",
+    "dist",
     "README.md"
   ],
   "scripts": {
@@ -46,7 +45,8 @@
     "@swc/helpers": "^0.5.17",
     "zustand": "^5.0.3",
     "qs-esm": "^7.0.2",
-    "plaiceholder": "^3.0.0"
+    "plaiceholder": "^3.0.0",
+    "schema-dts": "^1.1.5"
   },
   "devDependencies": {
     "@changesets/changelog-git": "^0.2.1",

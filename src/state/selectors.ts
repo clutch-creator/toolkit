@@ -27,7 +27,7 @@ export const closestInstanceSelector = (
   }
 
   // if not found, try to find the closest match by iteratively removing last key
-  let currentKeys = [...keys];
+  const currentKeys = [...keys];
 
   while (currentKeys.length > 0) {
     currentKeys.pop(); // remove last item

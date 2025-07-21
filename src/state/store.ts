@@ -113,10 +113,11 @@ export const useStore = create<TStore>((set, get) => ({
 
       if (!instance) {
         logger.warn(`No instance found`, selection);
+
         return state;
       }
 
-      const instances = state.instances;
+      const { instances } = state;
       const { instanceId, serializedScope, serializedKeys } = selection;
 
       const newInstances = {

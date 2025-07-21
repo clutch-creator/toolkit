@@ -2,7 +2,7 @@
 
 import { useCallback, useRef } from 'react';
 
-type AnyFunction = (...args: any[]) => any;
+type AnyFunction = (...args: unknown[]) => unknown;
 
 /**
  * A React hook that creates a stable callback reference that always calls the latest version

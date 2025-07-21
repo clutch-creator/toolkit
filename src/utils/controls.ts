@@ -2,10 +2,10 @@ import { JSX } from 'react';
 
 type TArray = string[] | undefined;
 type TCheckbox = boolean | undefined;
-type TCode = (...args: any[]) => any | undefined;
+type TCode = (...args: unknown[]) => unknown | undefined;
 type TColor = string | undefined;
 type TCombobox = string | undefined;
-type TComponent = React.ComponentType<any>;
+type TComponent = React.ComponentType<unknown>;
 type TFile = string | undefined;
 type TInput = string | undefined;
 type TJson = string | undefined;
@@ -13,7 +13,7 @@ type TMedia = string | undefined;
 type TNumber = number | undefined;
 type TObject =
   | {
-      [key: string]: any;
+      [key: string]: unknown;
     }
   | undefined;
 type TRichText = JSX.Element | undefined;
@@ -26,7 +26,9 @@ type TStyles =
 type TSvg = JSX.Element | undefined;
 type TTextArea = string | undefined;
 type Url = string | undefined;
-type TAction = (data?: FormData | React.SyntheticEvent) => Promise<any | void>;
+type TAction = (
+  data?: FormData | React.SyntheticEvent
+) => Promise<unknown | void>;
 
 export type Controls = {
   Array: TArray;

@@ -1,10 +1,11 @@
 'use server';
 
-import fsPromises from 'fs/promises';
-import { posix as posixPath } from 'path';
+import * as fs from 'fs';
 import { unstable_cache } from 'next/cache';
+import { posix as posixPath } from 'path';
 import { getPlaiceholder } from 'plaiceholder';
 import 'server-only';
+import { logger } from '../../utils/logger.js';
 
 const calculateImageInfo = unstable_cache(
   async (src: string) => {
@@ -14,17 +15,12 @@ const calculateImageInfo = unstable_cache(
     if (isLocalImage) {
       // Remove any query parameters from the src path
       const cleanSrc = src.split('?')[0];
-      const publicPath = posixPath.join(
-        process.cwd(),
-        'public',
-        cleanSrc,
-      );
-
+      const publicPath = posixPath.join(process.cwd(), 'public', cleanSrc);
 
       try {
-        buffer = await fsPromises.readFile(publicPath);
+        buffer = await fs.promises.readFile(publicPath);
       } catch (err) {
-        console.error('Error reading local image:', err);
+        logger.error('Error reading local image:', err);
         throw new Error(`Failed to read local image: ${src}`);
       }
     } else {
@@ -42,7 +38,7 @@ const calculateImageInfo = unstable_cache(
     try {
       result = await getPlaiceholder(buffer, { size: 10 });
     } catch (err) {
-      console.error('getPlaiceholder failed:', err);
+      logger.error('getPlaiceholder failed:', err);
       throw err;
     }
 
@@ -55,9 +51,9 @@ const calculateImageInfo = unstable_cache(
     return {
       width: metadata.width,
       height: metadata.height,
-      format: metadata.format,
+      format: metadata.format || 'unknown',
       blurDataURL: base64,
-      color: color?.hex,
+      color: color?.hex || '',
       css,
     };
   },
@@ -65,7 +61,7 @@ const calculateImageInfo = unstable_cache(
   {
     tags: ['image-info'],
     revalidate: false,
-  },
+  }
 );
 
 export const getImageInfo = async (src: unknown) => {
@@ -82,10 +78,9 @@ export const getImageInfo = async (src: unknown) => {
     try {
       result = await calculateImageInfo(src);
     } catch (err) {
-      console.error('Error getting image:', err);
+      logger.error('Error getting image:', err);
     }
   }
 
   return result;
 };
-

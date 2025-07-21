@@ -1,4 +1,5 @@
 import React from 'react';
+import { logger } from './logger.js';
 
 /**
  * Configuration function for Clutch Elements
@@ -12,14 +13,14 @@ export const clutchElementConfig = (
     icon?: string;
     styleSelectors?: { name?: string; value: string }[];
   }
-) => undefined;
+) => logger.log(`Clutch Element Config: ${element.name}`, config);
 
 /**
  * Finds the entry instance that matches the given properties or returns the first entry if no match is found.
  */
 export const getEntryInstanceId = (
-  properties: Record<string, any>,
-  entryInstances: Array<{ id: string; variantIds?: Record<string, any> }>
+  properties: Record<string, unknown>,
+  entryInstances: Array<{ id: string; variantIds?: Record<string, unknown> }>
 ): string | undefined => {
   const entry =
     entryInstances.find(entry => {
@@ -38,9 +39,9 @@ export const getEntryInstanceId = (
  * Event handlers are chained, styles are merged as objects, and classNames are concatenated.
  */
 function mergeProps(
-  slotProps: Record<string, any>,
-  childProps: Record<string, any>
-): Record<string, any> {
+  slotProps: Record<string, unknown>,
+  childProps: Record<string, unknown>
+): Record<string, unknown> {
   const overrideProps = { ...childProps };
 
   for (const propName in childProps) {
@@ -50,15 +51,19 @@ function mergeProps(
 
     if (isHandler) {
       if (slotPropValue && childPropValue) {
-        overrideProps[propName] = (...args: any[]) => {
-          childPropValue(...args);
-          slotPropValue(...args);
+        overrideProps[propName] = (...args: unknown[]) => {
+          if (typeof childPropValue === 'function') childPropValue(...args);
+          if (typeof slotPropValue === 'function')
+            return slotPropValue(...args);
         };
       } else if (slotPropValue) {
         overrideProps[propName] = slotPropValue;
       }
     } else if (propName === 'style') {
-      overrideProps[propName] = { ...slotPropValue, ...childPropValue };
+      overrideProps[propName] = {
+        ...(typeof slotPropValue === 'object' ? slotPropValue : {}),
+        ...(typeof childPropValue === 'object' ? childPropValue : {}),
+      };
     } else if (propName === 'className') {
       overrideProps[propName] = [slotPropValue, childPropValue]
         .filter(Boolean)
@@ -75,29 +80,31 @@ function mergeProps(
  */
 export function cloneChildren(
   children: React.ReactNode,
-  props: Record<string, any>
+  props: Record<string, unknown>
 ): React.ReactNode {
   if (Object.keys(props).length === 0) {
     return children;
   }
 
-  delete props['debug-id'];
-  delete props['debug-reports'];
-  delete props['debug-parent'];
-  delete props['debug-loop'];
-  delete props['debug-stop'];
-  delete props['debug-is-section'];
-  delete props['debug-name'];
-  delete props['data-d'];
+  const newProps = { ...props };
+
+  delete newProps['debug-id'];
+  delete newProps['debug-reports'];
+  delete newProps['debug-parent'];
+  delete newProps['debug-loop'];
+  delete newProps['debug-stop'];
+  delete newProps['debug-is-section'];
+  delete newProps['debug-name'];
+  delete newProps['data-d'];
 
   const cloneChild = (child: React.ReactNode, index?: number) => {
     if (React.isValidElement(child)) {
       const clonedElement = React.cloneElement(child, {
         key: index,
-        ...mergeProps(child.props, props),
+        ...mergeProps((child.props || {}) as Record<string, unknown>, newProps),
       });
 
-      delete props.ref;
+      delete newProps.ref;
 
       return clonedElement;
     } else {
@@ -115,8 +122,8 @@ export function cloneChildren(
  * Only compares the first level of properties, not nested objects.
  */
 export const shallowEqual = (
-  obj1: Record<string, any> | undefined,
-  obj2: Record<string, any> | undefined
+  obj1: Record<string, unknown> | undefined,
+  obj2: Record<string, unknown> | undefined
 ): boolean => {
   if (obj1 === obj2) return true;
   if (!obj1 || !obj2) return obj1 === obj2;

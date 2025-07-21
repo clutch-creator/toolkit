@@ -1,17 +1,27 @@
 import type { NextRouter } from 'next/router.js';
 import * as qs from 'qs-esm';
 
-function deepMerge(target, source) {
+function deepMerge(
+  target: Record<string, unknown>,
+  source: Record<string, unknown>
+): Record<string, unknown> {
   for (const key in source) {
     if (source[key] instanceof Object && key in target) {
-      deepMerge(target[key], source[key]);
+      deepMerge(
+        target[key] as Record<string, unknown>,
+        source[key] as Record<string, unknown>
+      );
     }
   }
   Object.assign(target || {}, source);
+
   return target;
 }
 
-export const updateUrlSearchParams = (newParams, router: NextRouter) => {
+export const updateUrlSearchParams = (
+  newParams: Record<string, unknown>,
+  router: NextRouter
+) => {
   // Parse the current URL
   const url = new URL(window.location.href);
 

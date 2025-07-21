@@ -17,6 +17,7 @@ export async function middlewarePipe(
   let response = NextResponse.next();
 
   for (const plugin of pluginsMiddlewares) {
+    // eslint-disable-next-line no-await-in-loop
     const middlewareResp = await plugin(request, response, event);
 
     if (middlewareResp) {

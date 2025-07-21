@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-function-type */
 'use client';
 
 import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
@@ -35,7 +36,7 @@ type TStyleSelector = {
 type TRegisterActionOptions<T> = {
   actionName?: string;
   action: T;
-  extraProps?: Record<string, any>;
+  extraProps?: Record<string, unknown>;
   styleSelectors?: TStyleSelector[];
   wrapperComponent?: React.FunctionComponent<{
     children?: React.ReactNode;
@@ -43,7 +44,7 @@ type TRegisterActionOptions<T> = {
   }>;
 };
 
-export const useRegisterAction = <T extends Function>(
+export const useRegisterAction = <T extends (...args: unknown[]) => unknown>(
   options: TRegisterActionOptions<T>
 ) => {
   const selection = useSelection();
@@ -59,10 +60,9 @@ export const useRegisterAction = <T extends Function>(
 
   // validation
   if (!actionName || !action) {
-    console.warn(
+    throw new Error(
       'useRegisterAction: actionName and action are required parameters.'
     );
-    return;
   }
 
   // some options are not meant to be listened to changes
@@ -98,9 +98,9 @@ export const useRegisterAction = <T extends Function>(
         styleSelectors: staticOptions.current.styleSelectors,
       });
     }
+  }, [actionName, wrapperComponent, extraProps, registerAction, selection]);
 
-    prevOptionsRef.current = options;
-  }, [selection, actionName, wrapperComponent, extraProps, staticOptions]);
+  prevOptionsRef.current = options;
 };
 
 export const useRegisterState = <T,>(
@@ -185,7 +185,8 @@ export const useEventsInstance = (
   }, [parentSelection, instanceId]);
 
   const extraProps: Record<string, unknown> = {};
-  const wrappers: React.FunctionComponent[] = [];
+  const wrappers: React.FunctionComponent<{ children?: React.ReactNode }>[] =
+    [];
   const styleSelectors: { name: string; value: string }[] = [];
 
   const setEventLoading = useStore(state => state.setEventLoading);

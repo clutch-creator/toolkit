@@ -5,11 +5,12 @@ export const ClientImage = ({
   children,
   ...props
 }: {
-  children: React.ReactNode;
+  children: React.LazyExoticComponent<React.ComponentType<unknown>>;
 }) => {
   const child =
     children?.$$typeof === Symbol.for('react.lazy')
-      ? use(children._payload)
+      ? // @ts-expect-error next react lazy payload
+        use(children._payload)
       : children;
 
   return React.isValidElement(child)

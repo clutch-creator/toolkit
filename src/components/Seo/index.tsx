@@ -1,6 +1,7 @@
 import React from 'react';
+import { TRobots, TSeo, TSeoOg, TSeoTwitter } from './types.js';
 
-function buildRobots(robots) {
+function buildRobots(robots: TRobots) {
   return robots
     ? Object.entries(robots)
         .map(([key, value]) => `${key}:${value}`)
@@ -14,9 +15,13 @@ function camelCaseToMeta(name: string) {
     .replace(/^:/, '');
 }
 
-function TwitterMeta({ twitter }) {
+type TwitterMetaProps = {
+  twitter?: TSeoTwitter;
+};
+
+function TwitterMeta({ twitter }: TwitterMetaProps) {
   if (!twitter || typeof twitter !== 'object') return null;
-  let result = [];
+  const result: React.ReactElement[] = [];
 
   Object.entries(twitter).map(([key, value]) => {
     if (key && typeof value === 'string') {
@@ -33,15 +38,20 @@ function TwitterMeta({ twitter }) {
   return <>{result}</>;
 }
 
-function OgMeta({ og }) {
+type TOgMetaProps = {
+  og?: TSeoOg;
+};
+
+function OgMeta({ og }: TOgMetaProps) {
   if (!og || typeof og !== 'object') return null;
 
-  let result = [];
+  const result: React.ReactElement[] = [];
 
   Object.entries(og).map(([key, value]) => {
-    if (key === 'images' && value && Array.isArray(value)) {
+    if (key === 'images' && og.images && Array.isArray(og.images)) {
       result.push(
-        ...value?.map((image, index) => (
+        ...og.images.map((image, index) => (
+          // eslint-disable-next-line react/no-array-index-key
           <React.Fragment key={`images-${index}`}>
             {image.url && <meta property='og:image' content={image.url} />}
             {image.type && (
@@ -77,7 +87,11 @@ function OgMeta({ og }) {
   return <>{result}</>;
 }
 
-export function Seo({ seoData }) {
+type TSeoProps = {
+  seoData: TSeo;
+};
+
+export function Seo({ seoData }: TSeoProps) {
   if (!seoData) return null;
 
   return (
@@ -89,7 +103,9 @@ export function Seo({ seoData }) {
       {seoData?.robots && (
         <meta name='robots' content={buildRobots(seoData.robots)} />
       )}
-      {seoData?.canonical && <link rel='canonical' href={seoData.canonical} />}
+      {seoData?.canonical && typeof seoData?.canonical == 'string' && (
+        <link rel='canonical' href={seoData.canonical} />
+      )}
       {seoData?.favicon && <link rel='icon' href={seoData.favicon} />}
       {seoData?.schema && (
         <script
