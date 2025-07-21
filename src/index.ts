@@ -5,7 +5,6 @@ export * from './utils/actions.js';
 export * from './utils/controls.js';
 export * from './utils/errors.js';
 export { clutchElementConfig } from './utils/helpers.js';
-export * from './utils/hooks.js';
 export * from './utils/logger.js';
 
 export {
