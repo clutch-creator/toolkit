@@ -15,10 +15,8 @@ export type TSelection = TStateScopeContext &
 
 export type TActionData = {
   actionName: string;
-  static: {
-    action: Function;
-    styleSelectors?: { name: string; value: string }[];
-  };
+  action: Function;
+  styleSelectors?: { name: string; value: string }[];
   extraProps?: Record<string, any>;
   wrapperComponent?: React.FunctionComponent;
 };
@@ -26,6 +24,11 @@ export type TActionData = {
 export type TInstanceState = {
   actions: Record<string, TActionData>;
   states: Record<string, unknown>;
+  actionsState: {
+    [eventName: string]: {
+      [actionName: string]: Record<string, unknown>;
+    };
+  };
   select: { handler?: Function; activeTrail?: boolean };
 };
 

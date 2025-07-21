@@ -1,12 +1,13 @@
 'use client';
 
 import React, { useContext, useEffect, useMemo } from 'react';
-import { cloneChildren } from '../helpers/utils.js';
+import { cloneChildren } from '../utils/helpers.js';
 import {
   StateIdContext,
   StateKeyContext,
   StateScopeContext,
 } from './contexts.js';
+import { getSerializedKeys, getSerializedScope } from './helpers.js';
 
 type TStateScopeProps = {
   children: React.ReactNode;
@@ -27,7 +28,7 @@ export const StateScope = ({
   const newValue = useMemo(
     () => ({
       scope: [...scope, clutchId],
-      serializedScope: [...scope, clutchId].join('#'),
+      serializedScope: getSerializedScope([...scope, clutchId]),
     }),
     [scope, clutchId]
   );
@@ -58,7 +59,7 @@ export const StateExitScope = ({
   const newValue = useMemo(
     () => ({
       scope: scope.slice(0, -1),
-      serializedScope: scope.slice(0, -1).join('#'),
+      serializedScope: getSerializedScope(scope.slice(0, -1)),
     }),
     [scope]
   );
@@ -129,7 +130,7 @@ export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
 
     return {
       keys: newKeys,
-      serializedKeys: newKeys.join('#'),
+      serializedKeys: getSerializedKeys(newKeys),
     };
   }, [keys, keyId]);
 
