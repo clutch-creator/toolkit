@@ -198,14 +198,16 @@ export const useEventsInstance = (
   };
 
   // adds component actions used in the events in this instance
-  const addActionState = (actionState: TActionData) => {
-    Object.assign(extraProps, actionState.extraProps);
+  const addActionState = (actionState: TActionData | undefined) => {
+    if (actionState) {
+      Object.assign(extraProps, actionState.extraProps);
 
-    if (actionState?.wrapperComponent)
-      wrappers.push(actionState.wrapperComponent);
+      if (actionState?.wrapperComponent)
+        wrappers.push(actionState.wrapperComponent);
 
-    if (actionState?.styleSelectors)
-      styleSelectors.push(...actionState.styleSelectors);
+      if (actionState?.styleSelectors)
+        styleSelectors.push(...actionState.styleSelectors);
+    }
   };
 
   const runAction = async (
