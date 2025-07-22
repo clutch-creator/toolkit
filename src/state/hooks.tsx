@@ -10,7 +10,7 @@ import {
 } from './contexts.js';
 import { getSerializedScope } from './helpers.js';
 import { closestInstanceSelector } from './selectors.js';
-import { useStore } from './store.js';
+import { store, useStore } from './store.js';
 import { TActionData, TInstanceState, TScopeSelection } from './types.js';
 
 const useScopeSelection = () => {
@@ -145,25 +145,32 @@ export const useRegisterSelect = (
   return null;
 };
 
+const getScopeWithSelectionId = (
+  scopeSelection: TScopeSelection,
+  selectionId: string
+): TScopeSelection => {
+  // selection id will be root instances plus id root1#root2#id
+  const rootInstances = selectionId.split('#');
+  const instanceId = rootInstances.pop() || selectionId;
+  const newScope = [...scopeSelection.scope, ...rootInstances];
+
+  return {
+    ...scopeSelection,
+    scope: newScope,
+    serializedScope: getSerializedScope(newScope),
+    instanceId,
+  };
+};
+
 export const useStateValue = <T,>(
   selectionId: string,
   sel: (instanceState: TInstanceState | undefined) => T
 ) => {
   const scopeSelection = useScopeSelection();
-
-  const instanceScopeSelection = useMemo(() => {
-    // selection id will be root instances plus id root1#root2#id
-    const rootInstances = selectionId.split('#');
-    const instanceId = rootInstances.pop() || selectionId;
-    const newScope = [...scopeSelection.scope, ...rootInstances];
-
-    return {
-      ...scopeSelection,
-      scope: newScope,
-      serializedScope: getSerializedScope(newScope),
-      instanceId,
-    };
-  }, [scopeSelection, selectionId]);
+  const instanceScopeSelection = useMemo(
+    () => getScopeWithSelectionId(scopeSelection, selectionId),
+    [scopeSelection, selectionId]
+  );
 
   return useStore(state =>
     sel(closestInstanceSelector(state, instanceScopeSelection))
@@ -178,6 +185,20 @@ export const useActionState = (
     selectionId,
     instanceState => instanceState?.actions?.[actionName]
   );
+};
+
+export const getStateValue = <T,>(
+  scopeSelection: TScopeSelection,
+  selectionId: string,
+  sel: (instanceState: TInstanceState | undefined) => T
+): T => {
+  const instanceScopeSelection = getScopeWithSelectionId(
+    scopeSelection,
+    selectionId
+  );
+  const state = store.getState();
+
+  return sel(closestInstanceSelector(state, instanceScopeSelection));
 };
 
 /**
@@ -245,6 +266,13 @@ export const useEventsInstance = (
     }
   };
 
+  const scopedGetStateValue = <T,>(
+    selectionId: string,
+    sel: (instanceState: TInstanceState | undefined) => T
+  ): T => {
+    return getStateValue(scopeSelection, selectionId, sel);
+  };
+
   const render = (events: Record<string, Function>) => {
     let res = cloneChildren(children, {
       ...extraProps,
@@ -261,6 +289,7 @@ export const useEventsInstance = (
 
   return {
     addActionState,
+    getStateValue: scopedGetStateValue,
     runAction,
     setLoading,
     render,
