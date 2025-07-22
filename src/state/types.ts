@@ -8,7 +8,7 @@ export type TStateKeyContext = {
   serializedKeys: string;
 };
 
-export type TSelection = TStateScopeContext &
+export type TScopeSelection = TStateScopeContext &
   TStateKeyContext & {
     instanceId: string;
   };
@@ -47,26 +47,33 @@ export type TStoreInstances = {
 export type TStore = {
   instances: TStoreInstances;
 
-  registerAction: (selection: TSelection, actionData: TActionData) => void;
+  registerAction: (
+    scopeSelection: TScopeSelection,
+    actionData: TActionData
+  ) => void;
 
-  registerState: (selection: TSelection, name: string, value: unknown) => void;
+  registerState: (
+    scopeSelection: TScopeSelection,
+    name: string,
+    value: unknown
+  ) => void;
 
   registerSelect: (
-    selection: TSelection,
+    scopeSelection: TScopeSelection,
     handler: (shouldBeVisible: boolean) => void,
     activeTrail: boolean
   ) => void;
 
-  unregisterInstance: (selection: TSelection) => void;
+  unregisterInstance: (scopeSelection: TScopeSelection) => void;
 
   setEventLoading: (
-    selection: TSelection,
+    scopeSelection: TScopeSelection,
     eventName: string,
     isLoading: boolean
   ) => void;
 
   setEventActionResult: (
-    selection: TSelection,
+    scopeSelection: TScopeSelection,
     eventName: string,
     actionName: string,
     result: unknown

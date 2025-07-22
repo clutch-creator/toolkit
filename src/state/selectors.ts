@@ -1,9 +1,9 @@
 import { getSerializedKeys } from './helpers.js';
-import { TInstanceState, TSelection, TStore } from './types.js';
+import { TInstanceState, TScopeSelection, TStore } from './types.js';
 
 export const instanceSelector = (
   state: TStore,
-  selection: TSelection
+  selection: TScopeSelection
 ): TInstanceState | undefined => {
   const { serializedScope, serializedKeys, instanceId } = selection;
 
@@ -12,10 +12,9 @@ export const instanceSelector = (
 
 export const closestInstanceSelector = (
   state: TStore,
-  selection: TSelection,
-  instanceId: string
+  scopeSelection: TScopeSelection
 ): TInstanceState | undefined => {
-  const { serializedScope, serializedKeys, keys } = selection;
+  const { serializedScope, serializedKeys, keys, instanceId } = scopeSelection;
 
   const instancesState = state.instances[serializedScope]?.[instanceId];
 

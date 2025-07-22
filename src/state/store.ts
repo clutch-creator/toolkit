@@ -3,17 +3,17 @@ import { logger } from '../utils/logger.js';
 import { instanceSelector } from './selectors.js';
 import {
   TInstanceState,
-  TSelection,
+  TScopeSelection,
   TStore,
   TStoreInstances,
 } from './types.js';
 
 const operateInstance = (
   instances: TStoreInstances,
-  selection: TSelection,
+  scopeSelection: TScopeSelection,
   instance: TInstanceState
 ): TStoreInstances => {
-  const { instanceId, serializedScope, serializedKeys } = selection;
+  const { instanceId, serializedScope, serializedKeys } = scopeSelection;
 
   return {
     ...instances,
@@ -27,8 +27,11 @@ const operateInstance = (
   };
 };
 
-const getInstance = (state: TStore, selection: TSelection): TInstanceState => {
-  const instance = instanceSelector(state, selection);
+const getInstance = (
+  state: TStore,
+  scopeSelection: TScopeSelection
+): TInstanceState => {
+  const instance = instanceSelector(state, scopeSelection);
 
   if (!instance) {
     return {
@@ -44,15 +47,15 @@ const getInstance = (state: TStore, selection: TSelection): TInstanceState => {
 export const useStore = create<TStore>((set, get) => ({
   instances: {},
 
-  registerAction: (selection, options) => {
+  registerAction: (scopeSelection, options) => {
     const { actionName } = options;
 
     set(state => {
-      logger.log('Registered Action', selection, options);
+      logger.log('Registered Action', scopeSelection, options);
 
-      const instance = getInstance(state, selection);
+      const instance = getInstance(state, scopeSelection);
 
-      const newInstances = operateInstance(state.instances, selection, {
+      const newInstances = operateInstance(state.instances, scopeSelection, {
         ...instance,
         actions: {
           ...instance.actions,
@@ -64,13 +67,13 @@ export const useStore = create<TStore>((set, get) => ({
     });
   },
 
-  registerState: (selection, name, value) => {
+  registerState: (scopeSelection, name, value) => {
     set(state => {
-      logger.log('Registered State', selection, name, value);
+      logger.log('Registered State', scopeSelection, name, value);
 
-      const instance = getInstance(state, selection);
+      const instance = getInstance(state, scopeSelection);
 
-      const newInstances = operateInstance(state.instances, selection, {
+      const newInstances = operateInstance(state.instances, scopeSelection, {
         ...instance,
         states: {
           ...instance.states,
@@ -82,13 +85,13 @@ export const useStore = create<TStore>((set, get) => ({
     });
   },
 
-  registerSelect: (selection, handler, activeTrail) => {
+  registerSelect: (scopeSelection, handler, activeTrail) => {
     // select dont need to update store state
-    const instance = instanceSelector(get(), selection);
+    const instance = instanceSelector(get(), scopeSelection);
 
     if (!instance) {
       set(state => {
-        const newInstances = operateInstance(state.instances, selection, {
+        const newInstances = operateInstance(state.instances, scopeSelection, {
           actions: {},
           states: {},
           select: {
@@ -105,20 +108,20 @@ export const useStore = create<TStore>((set, get) => ({
     }
   },
 
-  unregisterInstance: selection => {
+  unregisterInstance: scopeSelection => {
     set(state => {
-      logger.log('Unregistered Instance', selection);
+      logger.log('Unregistered Instance', scopeSelection);
 
-      const instance = instanceSelector(state, selection);
+      const instance = instanceSelector(state, scopeSelection);
 
       if (!instance) {
-        logger.warn(`No instance found`, selection);
+        logger.warn(`No instance found`, scopeSelection);
 
         return state;
       }
 
       const { instances } = state;
-      const { instanceId, serializedScope, serializedKeys } = selection;
+      const { instanceId, serializedScope, serializedKeys } = scopeSelection;
 
       const newInstances = {
         ...instances,
@@ -144,14 +147,14 @@ export const useStore = create<TStore>((set, get) => ({
   },
 
   setEventLoading: (
-    selection: TSelection,
+    scopeSelection: TScopeSelection,
     eventName: string,
     isLoading: boolean
   ) => {
     set(state => {
-      const instance = getInstance(state, selection);
+      const instance = getInstance(state, scopeSelection);
 
-      const newInstances = operateInstance(state.instances, selection, {
+      const newInstances = operateInstance(state.instances, scopeSelection, {
         ...instance,
         actionsState: {
           ...instance.actionsState,
@@ -167,15 +170,15 @@ export const useStore = create<TStore>((set, get) => ({
   },
 
   setEventActionResult: (
-    selection: TSelection,
+    scopeSelection: TScopeSelection,
     eventName: string,
     actionName: string,
     result: unknown
   ) => {
     set(state => {
-      const instance = getInstance(state, selection);
+      const instance = getInstance(state, scopeSelection);
 
-      const newInstances = operateInstance(state.instances, selection, {
+      const newInstances = operateInstance(state.instances, scopeSelection, {
         ...instance,
         actionsState: {
           ...instance.actionsState,

@@ -8,11 +8,12 @@ import {
   StateKeyContext,
   StateScopeContext,
 } from './contexts.js';
+import { getSerializedScope } from './helpers.js';
 import { closestInstanceSelector } from './selectors.js';
 import { useStore } from './store.js';
-import { TActionData, TInstanceState } from './types.js';
+import { TActionData, TInstanceState, TScopeSelection } from './types.js';
 
-const useSelection = () => {
+const useScopeSelection = () => {
   const scopeContext = useContext(StateScopeContext);
   const keyContext = useContext(StateKeyContext);
   const instanceId = useContext(StateIdContext);
@@ -47,7 +48,7 @@ type TRegisterActionOptions<T> = {
 export const useRegisterAction = <T extends (...args: unknown[]) => unknown>(
   options: TRegisterActionOptions<T>
 ) => {
-  const selection = useSelection();
+  const scopeSelection = useScopeSelection();
   const registerAction = useStore(state => state.registerAction);
 
   const {
@@ -90,7 +91,7 @@ export const useRegisterAction = <T extends (...args: unknown[]) => unknown>(
       !shallowEqual(prev.extraProps, extraProps);
 
     if (hasChanged) {
-      registerAction(selection, {
+      registerAction(scopeSelection, {
         actionName,
         extraProps,
         wrapperComponent,
@@ -98,7 +99,13 @@ export const useRegisterAction = <T extends (...args: unknown[]) => unknown>(
         styleSelectors: staticOptions.current.styleSelectors,
       });
     }
-  }, [actionName, wrapperComponent, extraProps, registerAction, selection]);
+  }, [
+    actionName,
+    wrapperComponent,
+    extraProps,
+    registerAction,
+    scopeSelection,
+  ]);
 
   prevOptionsRef.current = options;
 };
@@ -107,14 +114,14 @@ export const useRegisterState = <T,>(
   name: string,
   value: T
 ): ((newValue: T) => void) => {
-  const selection = useSelection();
+  const scopeSelection = useScopeSelection();
   const registerState = useStore(state => state.registerState);
 
   const setState = useCallback(
     (newValue: T) => {
-      registerState(selection, name, newValue);
+      registerState(scopeSelection, name, newValue);
     },
-    [name, selection, registerState]
+    [name, scopeSelection, registerState]
   );
 
   useEffect(() => {
@@ -128,38 +135,48 @@ export const useRegisterSelect = (
   setVisibility: (shouldBeVisible: boolean) => void,
   activeTrail = true
 ) => {
-  const selection = useSelection();
+  const scopeSelection = useScopeSelection();
   const registerSelect = useStore(state => state.registerSelect);
 
   useMemo(() => {
-    registerSelect(selection, setVisibility, activeTrail);
-  }, [selection, registerSelect, setVisibility, activeTrail]);
+    registerSelect(scopeSelection, setVisibility, activeTrail);
+  }, [scopeSelection, registerSelect, setVisibility, activeTrail]);
 
   return null;
 };
 
-export const useStateValue = (
-  instanceId: string,
-  sel: (instanceState: TInstanceState | undefined) => unknown
+export const useStateValue = <T,>(
+  selectionId: string,
+  sel: (instanceState: TInstanceState | undefined) => T
 ) => {
-  const selection = useSelection();
+  const scopeSelection = useScopeSelection();
+
+  const instanceScopeSelection = useMemo(() => {
+    // selection id will be root instances plus id root1#root2#id
+    const rootInstances = selectionId.split('#');
+    const instanceId = rootInstances.pop() || selectionId;
+    const newScope = [...scopeSelection.scope, ...rootInstances];
+
+    return {
+      ...scopeSelection,
+      scope: newScope,
+      serializedScope: getSerializedScope(newScope),
+      instanceId,
+    };
+  }, [scopeSelection, selectionId]);
 
   return useStore(state =>
-    sel(closestInstanceSelector(state, selection, instanceId))
+    sel(closestInstanceSelector(state, instanceScopeSelection))
   );
 };
 
 export const useActionState = (
-  instanceId: string,
+  selectionId: string,
   actionName: string
 ): TActionData | undefined => {
-  const selection = useSelection();
-
-  return useStore(
-    state =>
-      closestInstanceSelector(state, selection, instanceId)?.actions?.[
-        actionName
-      ]
+  return useStateValue(
+    selectionId,
+    instanceState => instanceState?.actions?.[actionName]
   );
 };
 
@@ -176,13 +193,13 @@ export const useEventsInstance = (
     [key: string]: unknown;
   }
 ) => {
-  const parentSelection = useSelection();
-  const selection = useMemo(() => {
+  const parenScopeSelection = useScopeSelection();
+  const scopeSelection: TScopeSelection = useMemo(() => {
     return {
-      ...parentSelection,
+      ...parenScopeSelection,
       instanceId: instanceId,
     };
-  }, [parentSelection, instanceId]);
+  }, [parenScopeSelection, instanceId]);
 
   const extraProps: Record<string, unknown> = {};
   const wrappers: React.FunctionComponent<{ children?: React.ReactNode }>[] =
@@ -195,7 +212,7 @@ export const useEventsInstance = (
   const setLoading = (eventName: string, isLoading: boolean) => {
     // This function would set the loading state for the action
     // It could be implemented using a state management solution or context
-    setEventLoading(selection, eventName, isLoading);
+    setEventLoading(scopeSelection, eventName, isLoading);
   };
 
   // adds component actions used in the events in this instance
@@ -219,9 +236,9 @@ export const useEventsInstance = (
     try {
       const res = await actionFn();
 
-      setEventActionResult(selection, eventName, actionName, res);
+      setEventActionResult(scopeSelection, eventName, actionName, res);
     } catch (error) {
-      setEventActionResult(selection, eventName, actionName, {
+      setEventActionResult(scopeSelection, eventName, actionName, {
         error: error?.toString(),
       });
       throw error;
