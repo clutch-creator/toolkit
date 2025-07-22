@@ -14,24 +14,44 @@
     "clutch"
   ],
   "exports": {
-    ".": "./dist/index.js",
-    "./components/*": "./dist/components/*/index.js",
-    "./state": "./dist/state/index.js",
-    "./sitemap": "./dist/sitemap/index.js",
-    "./server": "./dist/server/index.js",
-    "./utils": "./dist/utils/index.js",
-    "./next/*": "./dist/next/*"
+    ".": {
+      "types": "./src/index.ts",
+      "default": "./dist/index.js"
+    },
+    "./components/*": {
+      "types": "./src/components/*/index.ts",
+      "default": "./dist/components/*/index.js"
+    },
+    "./state": {
+      "types": "./src/state/index.ts",
+      "default": "./dist/state/index.js"
+    },
+    "./sitemap": {
+      "types": "./src/sitemap/index.ts",
+      "default": "./dist/sitemap/index.js"
+    },
+    "./server": {
+      "types": "./src/server/index.ts",
+      "default": "./dist/server/index.js"
+    },
+    "./utils": {
+      "types": "./src/utils/index.ts",
+      "default": "./dist/utils/index.js"
+    },
+    "./next/*": {
+      "types": "./src/next/*/index.ts",
+      "default": "./dist/next/*"
+    }
   },
   "type": "module",
   "files": [
     "dist",
+    "src",
     "README.md"
   ],
   "scripts": {
-    "build:swc": "swc src --out-dir dist --config-file ./.swcrc --delete-dir-on-start --strip-leading-paths",
-    "build:tsc": "tsc --emitDeclarationOnly --outDir dist",
-    "build": "bun run build:swc && bun run build:tsc",
-    "dev": "bun run build:swc --watch",
+    "build": "swc src --out-dir dist --config-file ./.swcrc --delete-dir-on-start --strip-leading-paths",
+    "dev": "bun run build --watch",
     "lint": "eslint .",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
