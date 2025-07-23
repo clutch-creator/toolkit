@@ -23,48 +23,367 @@ bun add @clutch-creator/toolkit
 
 The Clutch Toolkit is designed to provide developers with a set of reusable components and utilities that integrate seamlessly with Next.js applications. It includes state management, SEO optimization, image handling, and various utility functions.
 
-## State Management Hooks
+## API Reference
+
+### State Management Hooks
+
+#### `useRegisterState(name, value)`
+
+Registers a state to be globally bindable in clutch.
+
+**Type Signature:**
 
 ```typescript
-import {
-  useRegisterAction,
-  useRegisterSelect,
-  useRegisterState,
-} from '@clutch-creator/toolkit';
+useRegisterState<T>(name: string, value: T): (newValue: T) => void
 ```
 
-- **`useRegisterAction(options)`**: Registers actions for components that can be triggered by events
-- **`useRegisterSelect(setVisibility, activeTrail)`**: Registers selection handlers for components
-- **`useRegisterState(name, value)`**: Registers and manages component state within the Clutch framework
-
-## Utilities
+**Example:**
 
 ```typescript
-import {
-  updateUrlSearchParams,
-  MissingEnvVariableError,
-  InvalidEnvVariableError,
-  clutchElementConfig,
-  logger,
-} from '@clutch-creator/toolkit';
+import { useRegisterState } from '@clutch-creator/toolkit';
+
+function Counter() {
+  const [counter, setCounter] = useState(0);
+
+  useRegisterState('count', counter);
+
+  const increment = () => setCounter(prev => prev + 1);
+  const reset = () => setCounter(0);
+
+  return (
+    <div>
+      <button onClick={increment}>Increment</button>
+      <button onClick={reset}>Reset</button>
+    </div>
+  );
+}
 ```
 
-### Actions
+#### `useRegisterAction(options)`
 
-- **`updateUrlSearchParams(newParams, router)`**: Updates URL search parameters while preserving existing ones. Useful for filtering, pagination, and state management through URLs.
+Registers actions for components that can be triggered by events.
+
+**Type Signature:**
+
+```typescript
+useRegisterAction<T>(
+  options: TRegisterActionOptions<T>
+): void
+
+interface TRegisterActionOptions<T> {
+  name?: string;
+  action: T;
+  props?: Record<string, unknown>;
+  wrapper?: React.FunctionComponent;
+  styleSelectors?: TStyleSelector[];
+}
+
+interface TStyleSelector {
+  name: string;
+  value: string;
+}
+```
+
+**Example:**
+
+```typescript
+import { useRegisterAction, useRegisterState } from '@clutch-creator/toolkit';
+
+function TodoItem({ id, text, completed }) {
+  const [toggled, setToggled] = useState(false);
+
+  useRegisterAction({
+    actionName: 'toggleTodo',
+    action: () => {
+      setToggled((value) => !value);
+    },
+    props: {
+      'data-toggled': toggled
+    },
+    styleSelectors: [
+      { name: 'Toggled', value: '&:[data-toggled=true]' }
+    ]
+  });
+
+  return <div className={completed ? 'completed' : ''}>{text}</div>;
+}
+```
+
+#### `useRegisterSelect(setVisibility, activeTrail)`
+
+Registers a handler to be called when the element is selected in clutch.
+
+**Type Signature:**
+
+```typescript
+useRegisterSelect(
+  setVisibility: (shouldBeVisible: boolean) => void,
+  activeTrail?: boolean
+): null
+```
+
+**Example:**
+
+```typescript
+import { useRegisterSelect } from '@clutch-creator/toolkit';
+import { useState } from 'react';
+
+function ConditionalContent({ children }) {
+  const [isVisible, setIsVisible] = useState(true);
+
+  useRegisterSelect(
+    (shouldBeVisible) => setIsVisible(shouldBeVisible),
+    true // activeTrail - whether it should be called when a child is selected
+  );
+
+  if (!isVisible) return null;
+
+  return <div className="conditional-content">{children}</div>;
+}
+```
+
+### Utilities
+
+#### `updateUrlSearchParams(newParams, router)`
+
+Updates URL search parameters while preserving existing ones. Useful for filtering, pagination, and state management through URLs.
+
+**Type Signature:**
+
+```typescript
+updateUrlSearchParams(
+  newParams: Record<string, unknown>,
+  router: NextRouter
+): Record<string, unknown>
+```
+
+**Example:**
+
+```typescript
+import { updateUrlSearchParams } from '@clutch-creator/toolkit';
+import { useRouter } from 'next/router';
+
+function ProductFilters() {
+  const router = useRouter();
+
+  const handleCategoryFilter = (category: string) => {
+    updateUrlSearchParams({ category, page: 1 }, router);
+    // URL: /products?category=electronics&page=1
+  };
+
+  const handlePriceRange = (min: number, max: number) => {
+    updateUrlSearchParams({
+      priceMin: min.toString(),
+      priceMax: max.toString()
+    }, router);
+    // URL: /products?category=electronics&page=1&priceMin=100&priceMax=500
+  };
+
+  const clearFilters = () => {
+    updateUrlSearchParams({
+      category: null,
+      priceMin: null,
+      priceMax: null
+    }, router);
+    // URL: /products
+  };
+
+  return (
+    <div>
+      <button onClick={() => handleCategoryFilter('electronics')}>
+        Electronics
+      </button>
+      <button onClick={() => handlePriceRange(100, 500)}>
+        $100-$500
+      </button>
+      <button onClick={clearFilters}>Clear Filters</button>
+    </div>
+  );
+}
+```
+
+#### `clutchElementConfig(element, config)`
+
+Registers React components for use in the Clutch visual editor with optional configuration.
+
+**Type Signature:**
+
+```typescript
+clutchElementConfig(
+  element: React.FunctionComponent,
+  config: {
+    icon?: string;
+    styleSelectors?: { name?: string; value: string }[];
+  }
+): void
+```
+
+**Example:**
+
+```typescript
+import { clutchElementConfig } from '@clutch-creator/toolkit';
+
+const Button = ({ children, variant = 'primary', ...props }) => (
+  <button className={`btn btn-${variant}`} {...props}>
+    {children}
+  </button>
+);
+
+const Card = ({ title, children, ...props }) => (
+  <div className="card" {...props}>
+    <h3 className="card-title">{title}</h3>
+    <div className="card-content">{children}</div>
+  </div>
+);
+
+// Register components with Clutch editor
+clutchElementConfig(Button, {
+  icon: '🔘',
+  styleSelectors: [
+    { name: 'Hover', value: '&:hover' },
+    { name: 'Disabled', value: '&:disabled' },
+  ]
+});
+
+clutchElementConfig(Card, {
+  icon: '🃏',
+  styleSelectors: [
+    { name: 'Card Hover', value: '&:hover' },
+  ]
+});
+```
+
+#### `logger`
+
+Conditional logging utility that only outputs when `window.CLUTCH_DEBUG` is enabled.
+
+**Type Signature:**
+
+```typescript
+logger: {
+  log(...args: unknown[]): void;
+  warn(...args: unknown[]): void;
+  error(...args: unknown[]): void;
+}
+```
+
+**Example:**
+
+```typescript
+import { logger } from '@clutch-creator/toolkit';
+
+function DataProcessor({ data }) {
+  // Enable debugging in browser console: window.CLUTCH_DEBUG = true
+
+  logger.log('Processing data:', data);
+
+  try {
+    const processed = processData(data);
+    logger.log('Data processed successfully:', processed);
+    return processed;
+  } catch (error) {
+    logger.error('Error processing data:', error);
+    logger.warn('Falling back to default data');
+    return getDefaultData();
+  }
+}
+
+// In browser console (for development):
+// window.CLUTCH_DEBUG = true; // Enable logging
+// window.CLUTCH_DEBUG = false; // Disable logging
+```
 
 ### Error Classes
 
-- **`MissingEnvVariableError`**: Thrown when required environment variables are missing
-- **`InvalidEnvVariableError`**: Thrown when environment variables have invalid values
+#### `MissingEnvVariableError`
 
-### Configuration
+Thrown when required environment variables are missing.
 
-- **`clutchElementConfig(element, config)`**: Registers React components for use in the Clutch visual editor with optional configuration like icons and style selectors
+**Type Signature:**
 
-### Logging
+```typescript
+class MissingEnvVariableError extends Error {
+  constructor(envName: string);
+}
+```
 
-- **`logger`**: Conditional logging utility that only outputs when `window.CLUTCH_DEBUG` is enabled
+**Example:**
+
+```typescript
+import { MissingEnvVariableError } from '@clutch-creator/toolkit';
+
+function initializeApp() {
+  const apiKey = process.env.NEXT_PUBLIC_API_KEY;
+  const dbUrl = process.env.DATABASE_URL;
+
+  if (!apiKey) {
+    throw new MissingEnvVariableError('NEXT_PUBLIC_API_KEY');
+  }
+
+  if (!dbUrl) {
+    throw new MissingEnvVariableError('DATABASE_URL');
+  }
+
+  // Initialize app with environment variables
+  return { apiKey, dbUrl };
+}
+
+// Usage with error handling
+try {
+  const config = initializeApp();
+} catch (error) {
+  if (error instanceof MissingEnvVariableError) {
+    console.error('Configuration error:', error.message);
+    // Handle missing environment variable
+  }
+}
+```
+
+#### `InvalidEnvVariableError`
+
+Thrown when environment variables have invalid values.
+
+**Type Signature:**
+
+```typescript
+class InvalidEnvVariableError extends Error {
+  constructor(envName: string);
+}
+```
+
+**Example:**
+
+```typescript
+import { InvalidEnvVariableError } from '@clutch-creator/toolkit';
+
+function validateConfig() {
+  const port = process.env.PORT;
+  const nodeEnv = process.env.NODE_ENV;
+
+  if (port && isNaN(parseInt(port))) {
+    throw new InvalidEnvVariableError('PORT');
+  }
+
+  if (nodeEnv && !['development', 'production', 'test'].includes(nodeEnv)) {
+    throw new InvalidEnvVariableError('NODE_ENV');
+  }
+
+  return {
+    port: port ? parseInt(port) : 3000,
+    nodeEnv: nodeEnv || 'development',
+  };
+}
+
+// Usage
+try {
+  const config = validateConfig();
+} catch (error) {
+  if (error instanceof InvalidEnvVariableError) {
+    console.error('Invalid configuration:', error.message);
+    process.exit(1);
+  }
+}
+```
 
 ### Controls Types
 
@@ -77,6 +396,26 @@ import type { Controls } from '@clutch-creator/toolkit';
 // Array, Checkbox, Code, Color, Combobox, Component, File, Input,
 // Json, Media, Number, Object, RichText, Select, Styles, Svg,
 // TextArea, Url, Action
+```
+
+**Example:**
+
+```typescript
+import type { Controls } from '@clutch-creator/toolkit';
+
+type TSomeComponentProps = {
+  // props.image will use a media control
+  image: Controls["Media"],
+  /**
+   * You can also annotate a prop to set a control
+   * @control CustomControl
+   */
+  anotherProp: string
+}
+
+export function SomeComponent = (props: TSomeComponentProps) {
+  // ...
+}
 ```
 
 ## Package Exports
@@ -100,57 +439,6 @@ import { Svg } from '@clutch-creator/toolkit/components/Svg';
 - **`Seo`**: Comprehensive SEO component supporting Open Graph, Twitter Cards, and structured data
 - **`RichText`**: Flexible rich text renderer supporting both string and JSX content
 - **`Svg`**: SVG component wrapper for dynamic SVG rendering
-
-## Usage Examples
-
-### Basic State Management
-
-```typescript
-import { useRegisterState, useRegisterAction } from '@clutch-creator/toolkit';
-
-function MyComponent() {
-  const setState = useRegisterState('counter', 0);
-
-  useRegisterAction({
-    actionName: 'increment',
-    action: () => setState(current => current + 1)
-  });
-
-  return <div>My Component</div>;
-}
-```
-
-### URL Parameter Management
-
-```typescript
-import { updateUrlSearchParams } from '@clutch-creator/toolkit';
-import { useRouter } from 'next/router';
-
-function FilterComponent() {
-  const router = useRouter();
-
-  const handleFilter = (category: string) => {
-    updateUrlSearchParams({ category }, router);
-  };
-
-  return <button onClick={() => handleFilter('electronics')}>Filter</button>;
-}
-```
-
-### Component Registration
-
-```typescript
-import { clutchElementConfig } from '@clutch-creator/toolkit';
-
-const MyComponent = () => <div>Hello World</div>;
-
-clutchElementConfig(MyComponent, {
-  icon: '🎯',
-  styleSelectors: [
-    { name: 'Primary Button', value: 'btn-primary' }
-  ]
-});
-```
 
 ### Development Workflow
 
