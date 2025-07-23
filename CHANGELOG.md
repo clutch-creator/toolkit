@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.0.3
+
+### Patch Changes
+
+- 0cdb4e0: Remove use server from cache utils
+
 ## 1.0.2
 
 ### Patch Changes
