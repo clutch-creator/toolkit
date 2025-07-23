@@ -19,7 +19,7 @@
       "default": "./dist/index.js"
     },
     "./components/*": {
-      "types": "./src/components/*/index.ts",
+      "types": "./src/components/*/index.tsx",
       "default": "./dist/components/*/index.js"
     },
     "./state": {

@@ -1,6 +1,8 @@
 import { MetadataRoute } from 'next';
 import { Sitemap } from './types.js';
 
+export * from './types.js';
+
 const parsePathSegments = (value: string | undefined): string[] => {
   if (!value) return [];
 
