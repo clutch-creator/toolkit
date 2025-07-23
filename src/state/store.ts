@@ -47,6 +47,8 @@ const getInstance = (
 export const useStore = create<TStore>((set, get) => ({
   instances: {},
 
+  styleSelectors: {},
+
   registerAction: (scopeSelection, options) => {
     const { name } = options;
 
@@ -191,6 +193,16 @@ export const useStore = create<TStore>((set, get) => ({
 
       return { instances: newInstances };
     });
+  },
+
+  updateInstanceStyleSelectors: (
+    selectionId: string,
+    styleSelectors: { name: string; value: string }[]
+  ) => {
+    // we dont need to update the store, mutate styleSelectors directly (debugging only)
+    const state = get();
+
+    state.styleSelectors[selectionId] = styleSelectors;
   },
 }));
 

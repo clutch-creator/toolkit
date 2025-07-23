@@ -13,10 +13,15 @@ export type TScopeSelection = TStateScopeContext &
     instanceId: string;
   };
 
+export type TStyleSelector = {
+  name: string;
+  value: string;
+};
+
 export type TActionData = {
   name: string;
   action: (...args: unknown[]) => unknown;
-  styleSelectors?: { name: string; value: string }[];
+  styleSelectors?: TStyleSelector[];
   props?: Record<string, unknown>;
   wrapper?: React.FunctionComponent;
 };
@@ -46,6 +51,10 @@ export type TStoreInstances = {
 
 export type TStore = {
   instances: TStoreInstances;
+
+  styleSelectors: {
+    [selectionId: string]: TStyleSelector[];
+  };
 
   registerAction: (
     scopeSelection: TScopeSelection,
@@ -77,5 +86,10 @@ export type TStore = {
     eventName: string,
     actionName: string,
     result: unknown
+  ) => void;
+
+  updateInstanceStyleSelectors: (
+    selectionId: string,
+    styleSelectors: TStyleSelector[]
   ) => void;
 };

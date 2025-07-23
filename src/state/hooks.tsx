@@ -274,6 +274,15 @@ export const useEventsInstance = (
     return res;
   };
 
+  const updateInstanceStyleSelectors = useStore(
+    state => state.updateInstanceStyleSelectors
+  );
+  const selectionId = useMemo(() => {
+    return [...scopeSelection.scope, scopeSelection.instanceId].join('#');
+  }, [scopeSelection]);
+
+  updateInstanceStyleSelectors(selectionId, styleSelectors);
+
   return {
     addActionState,
     getStateValue: scopedGetStateValue,
