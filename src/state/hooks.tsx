@@ -35,14 +35,14 @@ type TStyleSelector = {
 };
 
 type TRegisterActionOptions<T> = {
-  actionName?: string;
+  name?: string;
   action: T;
-  extraProps?: Record<string, unknown>;
-  styleSelectors?: TStyleSelector[];
-  wrapperComponent?: React.FunctionComponent<{
+  props?: Record<string, unknown>;
+  wrapper?: React.FunctionComponent<{
     children?: React.ReactNode;
     [key: string]: unknown;
   }>;
+  styleSelectors?: TStyleSelector[];
 };
 
 export const useRegisterAction = <T extends (...args: unknown[]) => unknown>(
@@ -51,18 +51,12 @@ export const useRegisterAction = <T extends (...args: unknown[]) => unknown>(
   const scopeSelection = useScopeSelection();
   const registerAction = useStore(state => state.registerAction);
 
-  const {
-    actionName = '',
-    action,
-    extraProps,
-    styleSelectors,
-    wrapperComponent,
-  } = options;
+  const { name = '', action, props, styleSelectors, wrapper } = options;
 
   // validation
-  if (!actionName || !action) {
+  if (!name || !action) {
     throw new Error(
-      'useRegisterAction: actionName and action are required parameters.'
+      'useRegisterAction: name and action are required parameters.'
     );
   }
 
@@ -86,26 +80,20 @@ export const useRegisterAction = <T extends (...args: unknown[]) => unknown>(
     const prev = prevOptionsRef.current;
     const hasChanged =
       !prev ||
-      prev.actionName !== actionName ||
-      prev.wrapperComponent !== wrapperComponent ||
-      !shallowEqual(prev.extraProps, extraProps);
+      prev.name !== name ||
+      prev.wrapper !== wrapper ||
+      !shallowEqual(prev.props, props);
 
     if (hasChanged) {
       registerAction(scopeSelection, {
-        actionName,
-        extraProps,
-        wrapperComponent,
+        name,
+        props,
+        wrapper,
         action: staticOptions.current.action,
         styleSelectors: staticOptions.current.styleSelectors,
       });
     }
-  }, [
-    actionName,
-    wrapperComponent,
-    extraProps,
-    registerAction,
-    scopeSelection,
-  ]);
+  }, [name, wrapper, props, registerAction, scopeSelection]);
 
   prevOptionsRef.current = options;
 };
@@ -239,10 +227,9 @@ export const useEventsInstance = (
   // adds component actions used in the events in this instance
   const addActionState = (actionState: TActionData | undefined) => {
     if (actionState) {
-      Object.assign(extraProps, actionState.extraProps);
+      Object.assign(extraProps, actionState.props);
 
-      if (actionState?.wrapperComponent)
-        wrappers.push(actionState.wrapperComponent);
+      if (actionState?.wrapper) wrappers.push(actionState.wrapper);
 
       if (actionState?.styleSelectors)
         styleSelectors.push(...actionState.styleSelectors);

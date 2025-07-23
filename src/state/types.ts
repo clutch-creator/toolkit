@@ -14,11 +14,11 @@ export type TScopeSelection = TStateScopeContext &
   };
 
 export type TActionData = {
-  actionName: string;
+  name: string;
   action: (...args: unknown[]) => unknown;
   styleSelectors?: { name: string; value: string }[];
-  extraProps?: Record<string, unknown>;
-  wrapperComponent?: React.FunctionComponent;
+  props?: Record<string, unknown>;
+  wrapper?: React.FunctionComponent;
 };
 
 export type TInstanceState = {

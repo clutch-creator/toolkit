@@ -48,7 +48,7 @@ export const useStore = create<TStore>((set, get) => ({
   instances: {},
 
   registerAction: (scopeSelection, options) => {
-    const { actionName } = options;
+    const { name } = options;
 
     set(state => {
       logger.log('Registered Action', scopeSelection, options);
@@ -59,7 +59,7 @@ export const useStore = create<TStore>((set, get) => ({
         ...instance,
         actions: {
           ...instance.actions,
-          [actionName]: options,
+          [name]: options,
         },
       });
 
