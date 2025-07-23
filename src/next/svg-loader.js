@@ -1,10 +1,10 @@
 /* eslint-disable */
 
-const { transform } = require('@svgr/core');
-const jsx = require('@svgr/plugin-jsx');
-const svgo = require('@svgr/plugin-svgo');
+import { transform } from '@svgr/core';
+import jsx from '@svgr/plugin-jsx';
+import svgo from '@svgr/plugin-svgo';
 
-module.exports = async function SvgLoader(source) {
+export default async function SvgLoader(source) {
   this.cacheable && this.cacheable();
   const callback = this.async();
 
@@ -40,4 +40,4 @@ module.exports = async function SvgLoader(source) {
   } catch (e) {
     callback(e);
   }
-};
+}
