@@ -105,6 +105,7 @@ export const useStore = create<TStore>((set, get) => ({
         return { instances: newInstances };
       });
     } else {
+      instance.select = instance.select || {};
       instance.select.handler = handler;
       instance.select.activeTrail = activeTrail;
     }
