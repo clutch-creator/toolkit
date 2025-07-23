@@ -19,7 +19,7 @@ export function ApplyHooks({
   pagePath,
   pageSettings,
   children,
-}: TApplyHooksProps) {
+}: TApplyHooksProps): React.ReactNode {
   let newVars: Record<string, unknown> = { ...vars };
 
   const result = useMemo(() => {
@@ -38,6 +38,8 @@ export function ApplyHooks({
               // eslint-disable-next-line react-hooks/exhaustive-deps
               if (hookVars) newVars = { ...newVars, ...hookVars };
 
+              if (typeof acc !== 'function') return acc;
+
               return acc(newVars);
             }}
           </HookComponent>
@@ -47,5 +49,5 @@ export function ApplyHooks({
     );
   }, [hooks, vars, pagePath, pageSettings, children]);
 
-  return result;
+  return typeof result === 'function' ? result(newVars) : result;
 }
