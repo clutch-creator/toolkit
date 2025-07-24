@@ -1,5 +1,15 @@
 # @clutch-creator/toolkit
 
+## 1.1.0
+
+### Minor Changes
+
+- 1046a42: Added not found redirect component
+
+### Patch Changes
+
+- a6feac1: Improve action registration and fix set state during render error
+
 ## 1.0.3
 
 ### Patch Changes
