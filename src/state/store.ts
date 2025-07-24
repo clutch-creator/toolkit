@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { shallowEqual } from '../utils/helpers.js';
 import { logger } from '../utils/logger.js';
 import { instanceSelector } from './selectors.js';
 import {
@@ -50,23 +51,33 @@ export const useStore = create<TStore>((set, get) => ({
   styleSelectors: {},
 
   registerAction: (scopeSelection, options) => {
-    const { name } = options;
+    const { name, wrapper, action } = options;
 
-    set(state => {
-      logger.log('Registered Action', scopeSelection, options);
+    const instance = getInstance(get(), scopeSelection);
+    const existingActionOptions = instance?.actions?.[name];
 
-      const instance = getInstance(state, scopeSelection);
+    if (
+      !instance ||
+      !existingActionOptions ||
+      existingActionOptions.wrapper !== wrapper ||
+      !shallowEqual(existingActionOptions.props, options.props) ||
+      existingActionOptions.action !== action
+    ) {
+      set(state => {
+        const newInstances = operateInstance(state.instances, scopeSelection, {
+          ...instance,
+          actions: {
+            ...instance.actions,
+            [name]: options,
+          },
+        });
 
-      const newInstances = operateInstance(state.instances, scopeSelection, {
-        ...instance,
-        actions: {
-          ...instance.actions,
-          [name]: options,
-        },
+        return { instances: newInstances };
       });
-
-      return { instances: newInstances };
-    });
+    } else {
+      // mutate styleSelectors directly since they are used for introspection only
+      existingActionOptions.styleSelectors = options.styleSelectors;
+    }
   },
 
   registerState: (scopeSelection, name, value) => {

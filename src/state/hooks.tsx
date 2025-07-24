@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 'use client';
 
-import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
-import { cloneChildren, shallowEqual } from '../utils/helpers.js';
+import { useCallback, useContext, useEffect, useMemo } from 'react';
+import { cloneChildren } from '../utils/helpers.js';
+import { useEvent } from '../utils/hooks.js';
 import {
   StateIdContext,
   StateKeyContext,
@@ -35,7 +36,7 @@ type TStyleSelector = {
 };
 
 type TRegisterActionOptions<T> = {
-  name?: string;
+  name: string;
   action: T;
   props?: Record<string, unknown>;
   wrapper?: React.FunctionComponent<{
@@ -51,7 +52,7 @@ export const useRegisterAction = <T extends (...args: unknown[]) => unknown>(
   const scopeSelection = useScopeSelection();
   const registerAction = useStore(state => state.registerAction);
 
-  const { name = '', action, props, styleSelectors, wrapper } = options;
+  const { name = '', action } = options;
 
   // validation
   if (!name || !action) {
@@ -60,42 +61,15 @@ export const useRegisterAction = <T extends (...args: unknown[]) => unknown>(
     );
   }
 
-  // some options are not meant to be listened to changes
+  // stable function ref for action
   // this reduces burden of user having to memoize them
-  const staticOptions = useRef<TRegisterActionOptions<T>>({
-    action,
-    styleSelectors,
+  const stableAction = useEvent((...args) => {
+    action(...args);
   });
 
-  // update static options if needed
-  useMemo(() => {
-    staticOptions.current.action = action;
-    staticOptions.current.styleSelectors = styleSelectors;
-  }, [action, styleSelectors]);
-
-  // update listenable options
-  const prevOptionsRef = useRef<TRegisterActionOptions<T> | null>(null);
-
-  useMemo(() => {
-    const prev = prevOptionsRef.current;
-    const hasChanged =
-      !prev ||
-      prev.name !== name ||
-      prev.wrapper !== wrapper ||
-      !shallowEqual(prev.props, props);
-
-    if (hasChanged) {
-      registerAction(scopeSelection, {
-        name,
-        props,
-        wrapper,
-        action: staticOptions.current.action,
-        styleSelectors: staticOptions.current.styleSelectors,
-      });
-    }
-  }, [name, wrapper, props, registerAction, scopeSelection]);
-
-  prevOptionsRef.current = options;
+  useEffect(() => {
+    registerAction(scopeSelection, { ...options, action: stableAction });
+  }, [options, registerAction, scopeSelection, stableAction]);
 };
 
 export const useRegisterState = <T,>(
