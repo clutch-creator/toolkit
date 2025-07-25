@@ -96,6 +96,7 @@ export function cloneChildren(
   delete newProps['debug-is-section'];
   delete newProps['debug-name'];
   delete newProps['data-d'];
+  delete newProps['clutchId'];
 
   const cloneChild = (child: React.ReactNode, index?: number) => {
     if (React.isValidElement(child)) {
