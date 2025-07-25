@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.1.1
+
+### Patch Changes
+
+- 1c4adad: Remove clutchId props on clone children
+
 ## 1.1.0
 
 ### Minor Changes
