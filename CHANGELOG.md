@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.3.1
+
+### Patch Changes
+
+- 58a0209: Fix public images processing on clutch image component
+
 ## 1.3.0
 
 ### Minor Changes
