@@ -1,37 +1,26 @@
 'use server';
 
-import * as fs from 'fs';
 import { unstable_cache } from 'next/cache';
-import { posix as posixPath } from 'path';
 import { getPlaiceholder } from 'plaiceholder';
 import 'server-only';
 import { logger } from '../../utils/logger.js';
 
 const calculateImageInfo = unstable_cache(
   async (src: string) => {
-    let buffer: Buffer;
     const isLocalImage = src.startsWith('/') && !src.startsWith('//');
+    let imageUrl = src;
 
     if (isLocalImage) {
-      // Remove any query parameters from the src path
-      const cleanSrc = src.split('?')[0];
-      const publicPath = posixPath.join(process.cwd(), 'public', cleanSrc);
-
-      try {
-        buffer = await fs.promises.readFile(publicPath);
-      } catch (err) {
-        logger.error('Error reading local image:', err);
-        throw new Error(`Failed to read local image: ${src}`);
-      }
-    } else {
-      const res = await fetch(src);
-
-      if (!res.ok) {
-        throw new Error('Failed to fetch image');
-      }
-
-      buffer = Buffer.from(await res.arrayBuffer());
+      imageUrl = process.env.NEXT_PUBLIC_WEBSITE_URL + src.split('?')[0];
     }
+
+    const res = await fetch(imageUrl);
+
+    if (!res.ok) {
+      throw new Error(`Failed to fetch image: ${imageUrl}`);
+    }
+
+    const buffer = Buffer.from(await res.arrayBuffer());
 
     let result;
 
