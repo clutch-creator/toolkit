@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.2.1
+
+### Patch Changes
+
+- e3030de: Client images default width and height
+
 ## 1.2.0
 
 ### Minor Changes
