@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.3.2
+
+### Patch Changes
+
+- 517b927: Try to load image from fs for build time purposes
+
 ## 1.3.1
 
 ### Patch Changes
