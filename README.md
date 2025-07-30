@@ -275,11 +275,11 @@ import { logger } from '@clutch-creator/toolkit';
 function DataProcessor({ data }) {
   // Enable debugging in browser console: window.CLUTCH_DEBUG = true
 
-  logger.debug('Processing data:', data);
+  logger.log('Processing data:', data);
 
   try {
     const processed = processData(data);
-    logger.debug('Data processed successfully:', processed);
+    logger.log('Data processed successfully:', processed);
     return processed;
   } catch (error) {
     logger.error('Error processing data:', error);
