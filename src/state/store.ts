@@ -82,7 +82,7 @@ export const useStore = create<TStore>((set, get) => ({
 
   registerState: (scopeSelection, name, value) => {
     set(state => {
-      logger.log('Registered State', scopeSelection, name, value);
+      logger.debug('Registered State', scopeSelection, name, value);
 
       const instance = getInstance(state, scopeSelection);
 
@@ -124,12 +124,12 @@ export const useStore = create<TStore>((set, get) => ({
 
   unregisterInstance: scopeSelection => {
     set(state => {
-      logger.log('Unregistered Instance', scopeSelection);
+      logger.debug('Unregistered Instance', scopeSelection);
 
       const instance = instanceSelector(state, scopeSelection);
 
       if (!instance) {
-        logger.warn(`No instance found`, scopeSelection);
+        logger.debug(`No instance found`, scopeSelection);
 
         return state;
       }

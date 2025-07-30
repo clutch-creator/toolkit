@@ -13,7 +13,7 @@ export const clutchElementConfig = (
     icon?: string;
     styleSelectors?: { name?: string; value: string }[];
   }
-) => logger.log(`Clutch Element Config: ${element.name}`, config);
+) => logger.debug(`Clutch Element Config: ${element.name}`, config);
 
 /**
  * Finds the entry instance that matches the given properties or returns the first entry if no match is found.
