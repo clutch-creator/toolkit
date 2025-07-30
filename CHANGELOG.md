@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.3.0
+
+### Minor Changes
+
+- f9edcbb: Improve logger to work outside clutch debugging only
+
 ## 1.2.1
 
 ### Patch Changes
