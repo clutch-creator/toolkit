@@ -1,4 +1,4 @@
-import { default as NextImage } from 'next/image';
+import NextImage from 'next/image';
 import { getImageInfo } from './utils';
 
 type TClutchImageProps = {
