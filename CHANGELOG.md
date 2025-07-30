@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.2.0
+
+### Minor Changes
+
+- 608c4d7: Client image render a next image similar to its server representation
+
 ## 1.1.1
 
 ### Patch Changes
