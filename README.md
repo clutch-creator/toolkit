@@ -41,11 +41,13 @@ useRegisterState<T>(name: string, value: T): (newValue: T) => void
 
 ```typescript
 import { useRegisterState } from '@clutch-creator/toolkit';
+import { useState } from 'react';
 
 function Counter() {
   const [counter, setCounter] = useState(0);
 
-  useRegisterState('count', counter);
+  // Register the state so it can be accessed globally in Clutch
+  useRegisterState<number>('count', counter);
 
   const increment = () => setCounter(prev => prev + 1);
   const reset = () => setCounter(0);
@@ -66,15 +68,18 @@ Registers actions for components that can be triggered by events.
 **Type Signature:**
 
 ```typescript
-useRegisterAction<T>(
+useRegisterAction<T extends (...args: unknown[]) => unknown>(
   options: TRegisterActionOptions<T>
 ): void
 
 interface TRegisterActionOptions<T> {
-  name?: string;
+  name: string;
   action: T;
   props?: Record<string, unknown>;
-  wrapper?: React.FunctionComponent;
+  wrapper?: React.FunctionComponent<{
+    children: React.ReactNode;
+    [key: string]: unknown;
+  }>;
   styleSelectors?: TStyleSelector[];
 }
 
@@ -87,15 +92,18 @@ interface TStyleSelector {
 **Example:**
 
 ```typescript
-import { useRegisterAction, useRegisterState } from '@clutch-creator/toolkit';
+import { useRegisterAction } from '@clutch-creator/toolkit';
+import { useState } from 'react';
+
+type TSetToggled = (toggled: boolean) => void;
 
 function TodoItem({ id, text, completed }) {
   const [toggled, setToggled] = useState(false);
 
-  useRegisterAction({
-    actionName: 'toggleTodo',
-    action: () => {
-      setToggled((value) => !value);
+  useRegisterAction<TSetToggled>({
+    name: 'setToggled',
+    action: (newValue) => {
+      setToggled((value) => newValue);
     },
     props: {
       'data-toggled': toggled
@@ -255,15 +263,16 @@ clutchElementConfig(Card, {
 
 #### `logger`
 
-Conditional logging utility that only outputs when `window.CLUTCH_DEBUG` is enabled.
+Conditional logging utility with different methods for development and debugging.
 
 **Type Signature:**
 
 ```typescript
 logger: {
-  log(...args: unknown[]): void;
-  warn(...args: unknown[]): void;
-  error(...args: unknown[]): void;
+  log(...args: unknown[]): void;      // Only in development
+  debug(...args: unknown[]): void;    // Only when window.CLUTCH_DEBUG = true
+  warn(...args: unknown[]): void;     // In development or server
+  error(...args: unknown[]): void;    // In development or server
 }
 ```
 
@@ -273,9 +282,11 @@ logger: {
 import { logger } from '@clutch-creator/toolkit';
 
 function DataProcessor({ data }) {
-  // Enable debugging in browser console: window.CLUTCH_DEBUG = true
-
+  // Always logs in development
   logger.log('Processing data:', data);
+
+  // Only logs when window.CLUTCH_DEBUG = true
+  logger.debug('Debug info:', data);
 
   try {
     const processed = processData(data);
@@ -288,9 +299,49 @@ function DataProcessor({ data }) {
   }
 }
 
-// In browser console (for development):
-// window.CLUTCH_DEBUG = true; // Enable logging
-// window.CLUTCH_DEBUG = false; // Disable logging
+// In browser console to enable debug logging:
+// window.CLUTCH_DEBUG = true;
+```
+
+#### `cloneChildren(children, props)`
+
+Clones React children and applies the given props to each child element. Filters out debug-related props and handles both single children and arrays of children.
+
+**Type Signature:**
+
+```typescript
+cloneChildren(
+  children: React.ReactNode,
+  props: Record<string, unknown>
+): React.ReactNode
+```
+
+**Example:**
+
+```typescript
+import { cloneChildren } from '@clutch-creator/toolkit';
+
+function WrapperComponent({ children, className, onClick }) {
+  // Clone children and add common props
+  const clonedChildren = cloneChildren(children, {
+    className: `child-element ${className}`,
+    onClick: onClick,
+    'data-wrapper': true
+  });
+
+  return <div className="wrapper">{clonedChildren}</div>;
+}
+
+// Usage
+function App() {
+  return (
+    <WrapperComponent className="highlighted" onClick={() => console.log('clicked')}>
+      <button>Button 1</button>
+      <button>Button 2</button>
+    </WrapperComponent>
+  );
+}
+// Both buttons will receive className="child-element highlighted" and onClick handler
 ```
 
 ### Error Classes
@@ -432,13 +483,20 @@ import { Link } from '@clutch-creator/toolkit/components/Link';
 import { Seo } from '@clutch-creator/toolkit/components/Seo';
 import { RichText } from '@clutch-creator/toolkit/components/RichText';
 import { Svg } from '@clutch-creator/toolkit/components/Svg';
+import { ApplyHooks } from '@clutch-creator/toolkit/components/ApplyHooks';
+import { NotFoundRedirect } from '@clutch-creator/toolkit/components/NotFoundRedirect';
+import { Slot } from '@clutch-creator/toolkit/components/Slot';
 ```
 
 - **`Image`**: Advanced Next.js Image wrapper with automatic placeholder generation and optimization
+- **`ClientImage`**: Client-side image component for dynamic image loading
 - **`Link`**: Enhanced Next.js Link component with support for complex URL parameter management
 - **`Seo`**: Comprehensive SEO component supporting Open Graph, Twitter Cards, and structured data
 - **`RichText`**: Flexible rich text renderer supporting both string and JSX content
 - **`Svg`**: SVG component wrapper for dynamic SVG rendering
+- **`ApplyHooks`**: Component for applying multiple hooks to children components
+- **`NotFoundRedirect`**: Component for handling 404 redirects
+- **`Slot`**: Utility component for passing props to children (uses `cloneChildren` internally)
 
 ### Development Workflow
 
