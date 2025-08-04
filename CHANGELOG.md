@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.4.0
+
+### Minor Changes
+
+- 8da72c4: Added instances state unregistering
+
 ## 1.3.2
 
 ### Patch Changes
