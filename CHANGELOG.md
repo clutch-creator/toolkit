@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.4.2
+
+### Patch Changes
+
+- f519634: Fix unregister instance
+
 ## 1.4.1
 
 ### Patch Changes
