@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useContext, useEffect, useMemo } from 'react';
+import React, { useContext, useEffect, useMemo, useRef } from 'react';
 import { cloneChildren } from '../utils/helpers.js';
 import {
   StateIdContext,
@@ -174,13 +174,11 @@ export const StateId = ({ children, clutchId, ...props }: TStateIdProps) => {
   const unregisterInstance = useStore(state => state.unregisterInstance);
 
   const clonedChildren = cloneChildren(children, props);
+  const ref = useRef(scopeSelection);
 
-  useEffect(
-    () => () => {
-      // unregisterInstance(scopeSelection);
-    },
-    [unregisterInstance, scopeSelection]
-  );
+  ref.current = scopeSelection;
+
+  useEffect(() => () => unregisterInstance(ref.current), [unregisterInstance]);
 
   return (
     <StateIdContext.Provider value={clutchId}>
