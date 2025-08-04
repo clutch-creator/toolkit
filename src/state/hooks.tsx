@@ -14,7 +14,7 @@ import { closestInstanceSelector } from './selectors.js';
 import { store, useStore } from './store.js';
 import { TActionData, TInstanceState, TScopeSelection } from './types.js';
 
-const useScopeSelection = () => {
+export const useScopeSelection = () => {
   const scopeContext = useContext(StateScopeContext);
   const keyContext = useContext(StateKeyContext);
   const instanceId = useContext(StateIdContext);

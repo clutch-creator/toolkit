@@ -8,6 +8,9 @@ import {
   StateScopeContext,
 } from './contexts.js';
 import { getSerializedKeys, getSerializedScope } from './helpers.js';
+import { useScopeSelection } from './hooks.js';
+import { useStore } from './store.js';
+import { TScopeSelection } from './types.js';
 
 type TStateScopeProps = {
   children: React.ReactNode;
@@ -161,7 +164,23 @@ type TStateIdProps = {
  * It reduces the api burden when registering states and actions by identifying the id beforehand.
  */
 export const StateId = ({ children, clutchId, ...props }: TStateIdProps) => {
+  const inheritedScopeSelection = useScopeSelection();
+  const scopeSelection: TScopeSelection = useMemo(() => {
+    return {
+      ...inheritedScopeSelection,
+      instanceId: clutchId,
+    };
+  }, [inheritedScopeSelection, clutchId]);
+  const unregisterInstance = useStore(state => state.unregisterInstance);
+
   const clonedChildren = cloneChildren(children, props);
+
+  useEffect(
+    () => () => {
+      unregisterInstance(scopeSelection);
+    },
+    [unregisterInstance, scopeSelection]
+  );
 
   return (
     <StateIdContext.Provider value={clutchId}>
