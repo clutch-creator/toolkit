@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.4.1
+
+### Patch Changes
+
+- 75abd96: Drop bad unregister instance
+
 ## 1.4.0
 
 ### Minor Changes
