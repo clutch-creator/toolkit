@@ -177,7 +177,7 @@ export const StateId = ({ children, clutchId, ...props }: TStateIdProps) => {
 
   useEffect(
     () => () => {
-      unregisterInstance(scopeSelection);
+      // unregisterInstance(scopeSelection);
     },
     [unregisterInstance, scopeSelection]
   );
