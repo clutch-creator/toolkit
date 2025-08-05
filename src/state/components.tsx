@@ -76,14 +76,30 @@ export const StateExitScope = ({
   );
 };
 
+/**
+ * StateKeysContext is used to passed down a reference that contains all instances rendered by stateKey
+ */
+const StateKeysContext = React.createContext<Record<string, Set<object>>>({});
+
+export const StateKeysProvider = ({
+  children,
+}: {
+  children: React.ReactNode;
+}) => {
+  const ref = useRef({});
+
+  return (
+    <StateKeysContext.Provider value={ref.current}>
+      {children}
+    </StateKeysContext.Provider>
+  );
+};
+
 type TStateKeyProps = {
   children: React.ReactNode;
   clutchId: string;
   [key: string]: unknown;
 };
-
-const instanceCounts = new Map<string, number>();
-let uniqueIdCounter = 0;
 
 /**
  * StateKey component is used to create a unique key for each instance of a component
@@ -92,42 +108,56 @@ let uniqueIdCounter = 0;
  * It also ensures that the state is correctly scoped and does not conflict with other instances.
  */
 export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
+  const activeInstances = useContext(StateKeysContext);
   const { serializedScope } = useContext(StateScopeContext);
   const { keys } = useContext(StateKeyContext);
 
-  // Debugging rellies on this memo to be in this first position
+  const scopedId = serializedScope
+    ? `${serializedScope}#${clutchId}`
+    : clutchId;
+
+  // Create a stable ref for this component instance
+  const instanceRef = useRef({});
+
+  // Generate a stable keyId based on the instance's position in the set
   const keyId = useMemo(() => {
-    uniqueIdCounter += 1;
+    if (!activeInstances[scopedId]) {
+      activeInstances[scopedId] = new Set();
+    }
 
-    return `${uniqueIdCounter}`;
-  }, []);
+    const instances = activeInstances[scopedId];
 
-  const scopedId = useMemo(() => {
-    return serializedScope ? `${serializedScope}#${clutchId}` : clutchId;
-  }, [serializedScope, clutchId]);
+    instances.add(instanceRef.current);
 
-  // incremente the instance count
+    // Convert set to array to get consistent ordering
+    const instanceArray = Array.from(instances);
+    const index = instanceArray.indexOf(instanceRef.current);
+
+    return `${index + 1}`;
+  }, [activeInstances, scopedId]);
+
+  // Determine if this is a loop (more than one instance)
   const isLoop = useMemo(() => {
-    const currentCount = instanceCounts.get(scopedId) || 0;
-    const newCount = currentCount + 1;
+    const instances = activeInstances[scopedId];
 
-    instanceCounts.set(scopedId, newCount);
+    return instances ? instances.size > 1 : false;
+  }, [activeInstances, scopedId]);
 
-    return newCount > 1;
-  }, [scopedId]);
-
-  // decrement the instance count
+  // Clean up on unmount
   useEffect(() => {
-    return () => {
-      const currentCount = instanceCounts.get(scopedId) || 0;
+    const currentInstanceRef = instanceRef.current;
 
-      if (currentCount > 1) {
-        instanceCounts.set(scopedId, currentCount - 1);
-      } else {
-        instanceCounts.delete(scopedId);
+    return () => {
+      const instances = activeInstances[scopedId];
+
+      if (instances) {
+        instances.delete(currentInstanceRef);
+        if (instances.size === 0) {
+          delete activeInstances[scopedId];
+        }
       }
     };
-  }, [scopedId]);
+  }, [activeInstances, scopedId]);
 
   const newKeyContextValue = useMemo(() => {
     const newKeys = [...keys, keyId];
