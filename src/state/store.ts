@@ -60,7 +60,12 @@ export const useStore = create<TStore>((set, get) => ({
       !instance ||
       !existingActionOptions ||
       existingActionOptions.wrapper !== wrapper ||
-      !shallowEqual(existingActionOptions.props, options.props) ||
+      !shallowEqual(
+        typeof existingActionOptions.props !== 'function'
+          ? existingActionOptions.props
+          : {},
+        typeof options.props !== 'function' ? options.props : {}
+      ) ||
       existingActionOptions.action !== action
     ) {
       set(state => {

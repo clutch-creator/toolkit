@@ -108,8 +108,9 @@ type TStateKeyProps = {
  * It also ensures that the state is correctly scoped and does not conflict with other instances.
  */
 export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
-  const activeInstances = useContext(StateKeysContext);
+  // clutch inspection is expecting this context in this position
   const { serializedScope } = useContext(StateScopeContext);
+  const activeInstances = useContext(StateKeysContext);
   const { keys } = useContext(StateKeyContext);
 
   const scopedId = serializedScope
@@ -120,6 +121,7 @@ export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
   const instanceRef = useRef({});
 
   // Generate a stable keyId based on the instance's position in the set
+  // clutch inspection is expecting this memo to be the second memoized state in fiber
   const keyId = useMemo(() => {
     if (!activeInstances[scopedId]) {
       activeInstances[scopedId] = new Set();

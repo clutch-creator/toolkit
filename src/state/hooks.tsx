@@ -1,8 +1,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 'use client';
 
-import { useCallback, useContext, useEffect, useMemo } from 'react';
-import { cloneChildren } from '../utils/helpers.js';
+import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import { cloneChildren, shallowEqual } from '../utils/helpers.js';
 import { useEvent } from '../utils/hooks.js';
 import {
   StateIdContext,
@@ -38,7 +38,9 @@ type TStyleSelector = {
 type TRegisterActionOptions<T> = {
   name: string;
   action: T;
-  props?: Record<string, unknown>;
+  props?:
+    | Record<string, unknown>
+    | ((...args: unknown[]) => Record<string, unknown>);
   wrapper?: React.FunctionComponent<{
     children?: React.ReactNode;
     [key: string]: unknown;
@@ -67,9 +69,18 @@ export const useRegisterAction = <T extends (...args: unknown[]) => unknown>(
     action(...args);
   });
 
+  const stablePropsFn = useEvent((...args) => {
+    return typeof options.props === 'function' ? options.props(...args) : {};
+  });
+
   useEffect(() => {
-    registerAction(scopeSelection, { ...options, action: stableAction });
-  }, [options, registerAction, scopeSelection, stableAction]);
+    registerAction(scopeSelection, {
+      ...options,
+      action: stableAction,
+      props:
+        typeof options.props === 'function' ? stablePropsFn : options.props,
+    });
+  }, [options, registerAction, scopeSelection, stableAction, stablePropsFn]);
 };
 
 export const useRegisterState = <T,>(
@@ -141,12 +152,48 @@ export const useStateValue = <T,>(
 
 export const useActionState = (
   selectionId: string,
-  actionName: string
+  actionName: string,
+  actionPropArgsSel?: () => unknown[]
 ): TActionData | undefined => {
-  return useStateValue(
-    selectionId,
-    instanceState => instanceState?.actions?.[actionName]
-  );
+  const propsRef = useRef<{
+    prevState: TInstanceState | undefined;
+    prevProps: Record<string, unknown> | undefined;
+    prevResult: TActionData | undefined;
+  }>({
+    prevState: undefined,
+    prevProps: undefined,
+    prevResult: undefined,
+  });
+
+  const actionState = useStateValue(selectionId, instanceState => {
+    const instActionState = instanceState?.actions?.[actionName];
+
+    if (typeof instActionState?.props === 'function') {
+      const calculatedProps = instActionState.props(
+        ...(actionPropArgsSel ? actionPropArgsSel() : [])
+      );
+
+      if (
+        propsRef.current.prevState !== instanceState ||
+        !shallowEqual(propsRef.current.prevProps, calculatedProps)
+      ) {
+        propsRef.current.prevState = instanceState;
+        propsRef.current.prevProps = calculatedProps;
+        propsRef.current.prevResult = {
+          ...instActionState,
+          props: instActionState.props(
+            ...(actionPropArgsSel ? actionPropArgsSel() : [])
+          ),
+        };
+      }
+
+      return propsRef.current.prevResult;
+    }
+
+    return instActionState;
+  });
+
+  return actionState;
 };
 
 export const getStateValue = <T,>(
@@ -201,7 +248,9 @@ export const useEventsInstance = (
   // adds component actions used in the events in this instance
   const addActionState = (actionState: TActionData | undefined) => {
     if (actionState) {
-      Object.assign(extraProps, actionState.props);
+      if (actionState.props && typeof actionState.props === 'object') {
+        Object.assign(extraProps, actionState.props);
+      }
 
       if (actionState?.wrapper) wrappers.push(actionState.wrapper);
 

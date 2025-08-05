@@ -22,7 +22,9 @@ export type TActionData = {
   name: string;
   action: (...args: unknown[]) => unknown;
   styleSelectors?: TStyleSelector[];
-  props?: Record<string, unknown>;
+  props?:
+    | Record<string, unknown>
+    | ((...args: unknown[]) => Record<string, unknown>);
   wrapper?: React.FunctionComponent;
 };
 
