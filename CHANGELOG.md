@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.5.0
+
+### Minor Changes
+
+- 0a242dd: Allow useRegisterAction props option to be a function that takes the same arguments as the action
+
 ## 1.4.3
 
 ### Patch Changes
