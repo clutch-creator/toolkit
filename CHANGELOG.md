@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.4.3
+
+### Patch Changes
+
+- ef99e0d: Improve instances identification
+
 ## 1.4.2
 
 ### Patch Changes
