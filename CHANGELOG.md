@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.5.1
+
+### Patch Changes
+
+- 58d24fb: Fix state key scope for better handling same instance renders in different loops iterations
+
 ## 1.5.0
 
 ### Minor Changes
