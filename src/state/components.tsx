@@ -111,11 +111,9 @@ export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
   // clutch inspection is expecting this context in this position
   const { serializedScope } = useContext(StateScopeContext);
   const activeInstances = useContext(StateKeysContext);
-  const { keys } = useContext(StateKeyContext);
+  const { keys, serializedKeys } = useContext(StateKeyContext);
 
-  const scopedId = serializedScope
-    ? `${serializedScope}#${clutchId}`
-    : clutchId;
+  const scopedId = `${serializedScope}#${serializedKeys}#${clutchId}`;
 
   // Create a stable ref for this component instance
   const instanceRef = useRef({});
