@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.6.0
+
+### Minor Changes
+
+- 66f0856: Added more helpers used in generated clutch app
+
 ## 1.5.1
 
 ### Patch Changes
