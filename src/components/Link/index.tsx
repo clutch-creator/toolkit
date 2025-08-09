@@ -54,6 +54,8 @@ const ParamsLink = ({
 
 type TAriaAttributes = Record<string, string | boolean>;
 
+type TDataAttributes = Record<string, string | boolean>;
+
 type TLinkProps = {
   className?: string;
   children: React.ReactNode;
@@ -95,8 +97,9 @@ export function Link({
     [disabled]
   );
 
-  const ariaAttributes: TAriaAttributes = useMemo(() => {
+  const [ariaAttributes, dataAttributes]: [TAriaAttributes, TDataAttributes] = useMemo(() => {
     const ariaAttributes: TAriaAttributes = {};
+    const dataAttributes: TDataAttributes = {};
 
     const isActive =
       currentPathname === (safeHref || currentPathname).split('?')[0];
@@ -107,19 +110,22 @@ export function Link({
 
     if (disabled) {
       ariaAttributes['aria-disabled'] = true;
+      dataAttributes['data-disabled'] = true;
     }
 
-    return ariaAttributes;
+    return [ariaAttributes, dataAttributes];
   }, [currentPathname, safeHref, disabled]);
 
   if (download) {
     return (
       <a
         {...ariaAttributes}
+        {...dataAttributes}
         className={className}
         href={disabled ? undefined : safeHref}
         role={disabled ? 'link' : undefined}
         onClick={onClick}
+        tabIndex={disabled ? '-1' : undefined}
         download
         {...props}
       >
@@ -132,9 +138,11 @@ export function Link({
     return (
       <a
         {...ariaAttributes}
-        role='link'
+        {...dataAttributes}
         className={className}
+        role='link'
         onClick={onClick}
+        tabIndex='-1'
         {...props}
       >
         {children}
@@ -146,10 +154,10 @@ export function Link({
     return (
       <NextLink
         {...ariaAttributes}
+        {...dataAttributes}
         href={safeHref}
         className={className}
         onClick={onClick}
-        download={download}
         {...props}
         prefetch={!!props.prefetch}
       >
@@ -169,6 +177,7 @@ export function Link({
         {({ calculatedHref }) => (
           <NextLink
             {...ariaAttributes}
+            {...dataAttributes}
             className={className}
             onClick={onClick}
             href={calculatedHref}
