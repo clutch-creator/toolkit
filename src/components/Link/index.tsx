@@ -126,7 +126,7 @@ export function Link({
         href={disabled ? undefined : safeHref}
         role={disabled ? 'link' : undefined}
         onClick={onClick}
-        tabIndex={disabled ? '-1' : undefined}
+        tabIndex={disabled ? -1 : undefined}
         download
         {...props}
       >
@@ -143,7 +143,7 @@ export function Link({
         className={className}
         role='link'
         onClick={onClick}
-        tabIndex='-1'
+        tabIndex={-1}
         {...props}
       >
         {children}
