@@ -97,24 +97,25 @@ export function Link({
     [disabled]
   );
 
-  const [ariaAttributes, dataAttributes]: [TAriaAttributes, TDataAttributes] = useMemo(() => {
-    const ariaAttributes: TAriaAttributes = {};
-    const dataAttributes: TDataAttributes = {};
+  const [ariaAttributes, dataAttributes]: [TAriaAttributes, TDataAttributes] =
+    useMemo(() => {
+      const ariaAttributes: TAriaAttributes = {};
+      const dataAttributes: TDataAttributes = {};
 
-    const isActive =
-      currentPathname === (safeHref || currentPathname).split('?')[0];
+      const isActive =
+        currentPathname === (safeHref || currentPathname).split('?')[0];
 
-    if (isActive) {
-      ariaAttributes['aria-current'] = 'page';
-    }
+      if (isActive) {
+        ariaAttributes['aria-current'] = 'page';
+      }
 
-    if (disabled) {
-      ariaAttributes['aria-disabled'] = true;
-      dataAttributes['data-disabled'] = true;
-    }
+      if (disabled) {
+        ariaAttributes['aria-disabled'] = true;
+        dataAttributes['data-disabled'] = true;
+      }
 
-    return [ariaAttributes, dataAttributes];
-  }, [currentPathname, safeHref, disabled]);
+      return [ariaAttributes, dataAttributes];
+    }, [currentPathname, safeHref, disabled]);
 
   if (download) {
     return (
