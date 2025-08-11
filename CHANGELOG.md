@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.6.2
+
+### Patch Changes
+
+- 3ca4f58: Fix nested loops identification
+
 ## 1.6.1
 
 ### Patch Changes
