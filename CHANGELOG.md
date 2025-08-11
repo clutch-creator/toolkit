@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.6.3
+
+### Patch Changes
+
+- 98fc6c4: State keys shortening for better scoping
+
 ## 1.6.2
 
 ### Patch Changes
