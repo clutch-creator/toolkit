@@ -109,9 +109,9 @@ type TStateKeyProps = {
  */
 export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
   // clutch inspection is expecting this context in this position
+  const { keys, serializedKeys } = useContext(StateKeyContext);
   const { serializedScope } = useContext(StateScopeContext);
   const activeInstances = useContext(StateKeysContext);
-  const { keys, serializedKeys } = useContext(StateKeyContext);
 
   const scopedId = `${serializedScope}#${serializedKeys}#${clutchId}`;
 
@@ -136,13 +136,6 @@ export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
     return `${index + 1}`;
   }, [activeInstances, scopedId]);
 
-  // Determine if this is a loop (more than one instance)
-  const isLoop = useMemo(() => {
-    const instances = activeInstances[scopedId];
-
-    return instances ? instances.size > 1 : false;
-  }, [activeInstances, scopedId]);
-
   // Clean up on unmount
   useEffect(() => {
     const currentInstanceRef = instanceRef.current;
@@ -152,6 +145,7 @@ export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
 
       if (instances) {
         instances.delete(currentInstanceRef);
+
         if (instances.size === 0) {
           delete activeInstances[scopedId];
         }
@@ -170,15 +164,11 @@ export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
 
   const clonedChildren = cloneChildren(children, props);
 
-  if (isLoop) {
-    return (
-      <StateKeyContext.Provider value={newKeyContextValue}>
-        {clonedChildren}
-      </StateKeyContext.Provider>
-    );
-  }
-
-  return clonedChildren;
+  return (
+    <StateKeyContext.Provider value={newKeyContextValue}>
+      {clonedChildren}
+    </StateKeyContext.Provider>
+  );
 };
 
 StateKey.displayName = 'StateKey';
