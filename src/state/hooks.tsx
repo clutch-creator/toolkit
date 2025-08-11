@@ -264,8 +264,10 @@ export const useEventsInstance = (
     actionName: string,
     actionFn: () => Promise<unknown>
   ) => {
+    let res;
+
     try {
-      const res = await actionFn();
+      res = await actionFn();
 
       setEventActionResult(scopeSelection, eventName, actionName, res);
     } catch (error) {
@@ -273,6 +275,18 @@ export const useEventsInstance = (
         error: error?.toString(),
       });
       throw error;
+    }
+
+    // If the result is an object with an error property, throw an error
+    // this prevents next actions from running
+    if (
+      res &&
+      typeof res === 'object' &&
+      'error' in res &&
+      typeof res.error === 'string' &&
+      res.error
+    ) {
+      throw new Error(res.error);
     }
   };
 
