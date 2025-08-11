@@ -1,5 +1,12 @@
 # @clutch-creator/toolkit
 
+## 1.6.1
+
+### Patch Changes
+
+- fa89fb6: Link data-disabled attr
+- 3a1e273: Handle error responses on actions
+
 ## 1.6.0
 
 ### Minor Changes
