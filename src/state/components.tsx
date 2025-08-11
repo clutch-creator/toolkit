@@ -156,9 +156,27 @@ export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
   const newKeyContextValue = useMemo(() => {
     const newKeys = [...keys, keyId];
 
+    // minify the keys to ensure scope accessibility
+    let last = '';
+    const resultKeys: string[] = [];
+
+    newKeys.forEach(key => {
+      if (key === '1' && last !== '1') {
+        resultKeys.push(key);
+      } else if (key !== '1') {
+        resultKeys.push(key);
+      }
+
+      last = key;
+    });
+
+    if (resultKeys.length === 1 && resultKeys[0] === '1') {
+      resultKeys.pop();
+    }
+
     return {
-      keys: newKeys,
-      serializedKeys: getSerializedKeys(newKeys),
+      keys: resultKeys,
+      serializedKeys: getSerializedKeys(resultKeys),
     };
   }, [keys, keyId]);
 
