@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.6.4
+
+### Patch Changes
+
+- 3a55d8e: Simplify loop keys identification
+
 ## 1.6.3
 
 ### Patch Changes
