@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.7.0
+
+### Minor Changes
+
+- 0ab7d01: make canonical url absolute if passed a relative path
+
 ## 1.6.4
 
 ### Patch Changes
