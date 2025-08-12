@@ -87,6 +87,14 @@ function OgMeta({ og }: TOgMetaProps) {
   return <>{result}</>;
 }
 
+function getAbsoluteUrl(url: string): string {
+  if (url.startsWith('/')) {
+    return `${process.env.NEXT_PUBLIC_WEBSITE_URL}${url}`;
+  }
+
+  return url;
+}
+
 type TSeoProps = {
   seoData: TSeo;
 };
@@ -104,7 +112,7 @@ export function Seo({ seoData }: TSeoProps) {
         <meta name='robots' content={buildRobots(seoData.robots)} />
       )}
       {seoData?.canonical && typeof seoData?.canonical == 'string' && (
-        <link rel='canonical' href={seoData.canonical} />
+        <link rel='canonical' href={getAbsoluteUrl(seoData.canonical)} />
       )}
       {seoData?.favicon && <link rel='icon' href={seoData.favicon} />}
       {seoData?.schema && (
