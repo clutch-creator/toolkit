@@ -154,31 +154,17 @@ export const StateKey = ({ children, clutchId, ...props }: TStateKeyProps) => {
   }, [activeInstances, scopedId]);
 
   const newKeyContextValue = useMemo(() => {
-    const newKeys = [...keys, keyId];
+    let resultKeys = keys;
 
-    // minify the keys to ensure scope accessibility
-    let last = '';
-    const resultKeys: string[] = [];
-
-    newKeys.forEach(key => {
-      if (key === '1' && last !== '1') {
-        resultKeys.push(key);
-      } else if (key !== '1') {
-        resultKeys.push(key);
-      }
-
-      last = key;
-    });
-
-    if (resultKeys.length === 1 && resultKeys[0] === '1') {
-      resultKeys.pop();
+    if (keyId !== '1') {
+      resultKeys = [...keys, `${clutchId}#${keyId}`];
     }
 
     return {
       keys: resultKeys,
       serializedKeys: getSerializedKeys(resultKeys),
     };
-  }, [keys, keyId]);
+  }, [keys, keyId, clutchId]);
 
   const clonedChildren = cloneChildren(children, props);
 
