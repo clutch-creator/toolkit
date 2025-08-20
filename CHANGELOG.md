@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.8.0
+
+### Minor Changes
+
+- 499a0cc: New StyleSelectors list
+
 ## 1.7.0
 
 ### Minor Changes
