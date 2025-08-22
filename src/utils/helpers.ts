@@ -20,6 +20,21 @@ export const clutchElementConfig = (
 ): void => logger.debug(`Clutch Element Config: ${element.name}`, config);
 
 /**
+ * Configuration function for Clutch Functions
+ *
+ * @param fn - The function to be used in Clutch
+ * @param config - Additional information about the function
+ * @param config.inputSchema - Optional input schema for the function, used by AI
+ * @returns void - This function only logs debug information
+ */
+export const clutchFunctionConfig = (
+  fn: (...args: unknown[]) => unknown,
+  config: {
+    inputSchema?: Record<string, unknown>;
+  }
+): void => logger.debug(`Clutch Function Config: ${fn.name}`, config);
+
+/**
  * Finds the entry instance that matches the given properties or returns the first entry if no match is found.
  *
  * @param properties - The properties to match against entry variant IDs
