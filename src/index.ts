@@ -4,7 +4,11 @@
 export * from './utils/actions.js';
 export * from './utils/controls.js';
 export * from './utils/errors.js';
-export { cloneChildren, clutchElementConfig } from './utils/helpers.js';
+export {
+  cloneChildren,
+  clutchElementConfig,
+  clutchFunctionConfig,
+} from './utils/helpers.js';
 export * from './utils/logger.js';
 
 export {
