@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.9.0
+
+### Minor Changes
+
+- 2d4efac: clutchFunctionConfig method
+
 ## 1.8.0
 
 ### Minor Changes
