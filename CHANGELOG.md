@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.9.1
+
+### Patch Changes
+
+- 7e64d5c: expose ID Select control
+
 ## 1.9.0
 
 ### Minor Changes
