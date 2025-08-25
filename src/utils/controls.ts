@@ -29,6 +29,7 @@ type Url = string | undefined;
 type TAction = (
   data?: FormData | React.SyntheticEvent
 ) => Promise<unknown | void>;
+type TIdPicker = string | undefined;
 
 export type Controls = {
   Array: TArray;
@@ -50,4 +51,5 @@ export type Controls = {
   TextArea: TTextArea;
   Url: Url;
   Action: TAction;
+  IdPicker: TIdPicker;
 };
