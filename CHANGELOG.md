@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.9.2
+
+### Patch Changes
+
+- 605cf79: Add system prompt to clutchFunctionConfig
+
 ## 1.9.1
 
 ### Patch Changes
