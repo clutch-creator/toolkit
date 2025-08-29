@@ -28,8 +28,10 @@ export const clutchElementConfig = (
  * @returns void - This function only logs debug information
  */
 export const clutchFunctionConfig = (
-  fn: (...args: unknown[]) => unknown,
+  // eslint-disable-next-line
+  fn: Function,
   config: {
+    systemPrompt?: string;
     inputSchema?: Record<string, unknown>;
   }
 ): void => logger.debug(`Clutch Function Config: ${fn.name}`, config);
