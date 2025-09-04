@@ -85,6 +85,11 @@ export type TStore = {
     message: string
   ) => void;
 
+  unregisterClutchMessage: (
+    scopeSelection: TScopeSelection,
+    level: 'warn' | 'error'
+  ) => void;
+
   unregisterInstance: (scopeSelection: TScopeSelection) => void;
 
   setEventLoading: (

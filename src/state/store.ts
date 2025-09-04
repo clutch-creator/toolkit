@@ -153,6 +153,18 @@ export const useStore = create<TStore>((set, get) => ({
     }
   },
 
+  unregisterClutchMessage: (scopeSelection, level) => {
+    logger.debug('Unregistered clutch message', scopeSelection, level);
+
+    if (level !== 'warn' && level !== 'error') return;
+
+    const instance = instanceSelector(get(), scopeSelection);
+
+    if (instance?.clutchMessages?.[level] !== undefined) {
+      delete instance?.clutchMessages?.[level];
+    }
+  },
+
   unregisterInstance: scopeSelection => {
     set(state => {
       logger.debug('Unregistered Instance', scopeSelection);
