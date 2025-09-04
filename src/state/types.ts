@@ -28,9 +28,15 @@ export type TActionData = {
   wrapper?: React.FunctionComponent;
 };
 
+type ClutchMessageLevel = 'warn' | 'error';
+
 export type TInstanceState = {
   actions?: Record<string, TActionData>;
   states?: Record<string, unknown>;
+  clutchMessages?: {
+    warn?: Set<string>;
+    error?: Set<string>;
+  };
   actionsState?: {
     [eventName: string]: {
       isLoading?: boolean;
@@ -73,6 +79,13 @@ export type TStore = {
     scopeSelection: TScopeSelection,
     handler: (shouldBeVisible: boolean) => void,
     activeTrail: boolean
+  ) => void;
+
+  setClutchMessage: (
+    scopeSelection: TScopeSelection,
+    shouldShow: boolean,
+    level: ClutchMessageLevel,
+    message: string
   ) => void;
 
   unregisterInstance: (scopeSelection: TScopeSelection) => void;
