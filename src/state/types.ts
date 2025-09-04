@@ -28,6 +28,8 @@ export type TActionData = {
   wrapper?: React.FunctionComponent;
 };
 
+type ClutchMessage = 'warn' | 'error';
+
 export type TInstanceState = {
   actions?: Record<string, TActionData>;
   states?: Record<string, unknown>;
@@ -81,13 +83,13 @@ export type TStore = {
 
   registerClutchMessage: (
     scopeSelection: TScopeSelection,
-    level: 'warn' | 'error',
+    level: ClutchMessage,
     message: string
   ) => void;
 
   unregisterClutchMessage: (
     scopeSelection: TScopeSelection,
-    level: 'warn' | 'error'
+    level: ClutchMessage
   ) => void;
 
   unregisterInstance: (scopeSelection: TScopeSelection) => void;
