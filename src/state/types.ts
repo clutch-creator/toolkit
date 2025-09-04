@@ -31,6 +31,10 @@ export type TActionData = {
 export type TInstanceState = {
   actions?: Record<string, TActionData>;
   states?: Record<string, unknown>;
+  clutchMessages?: {
+    warn?: string;
+    error?: string;
+  };
   actionsState?: {
     [eventName: string]: {
       isLoading?: boolean;
@@ -73,6 +77,12 @@ export type TStore = {
     scopeSelection: TScopeSelection,
     handler: (shouldBeVisible: boolean) => void,
     activeTrail: boolean
+  ) => void;
+
+  registerClutchMessage: (
+    scopeSelection: TScopeSelection,
+    level: 'warn' | 'error',
+    message: string
   ) => void;
 
   unregisterInstance: (scopeSelection: TScopeSelection) => void;

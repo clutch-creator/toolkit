@@ -328,3 +328,17 @@ export const useEventsInstance = (
     render,
   };
 };
+
+/**
+ *
+ * @param shouldWarn true if Clutch should show a warning
+ * @param warnMessage message to show
+ */
+export const useClutchWarn = (shouldWarn = false, warnMessage = '') => {
+  const scopeSelection = useScopeSelection();
+  const registerClutchMessage = useStore(state => state.registerClutchMessage);
+
+  useEffect(() => {
+    registerClutchMessage(scopeSelection, 'warn', warnMessage);
+  }, [shouldWarn, warnMessage, registerClutchMessage, scopeSelection]);
+};
