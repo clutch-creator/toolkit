@@ -28,14 +28,14 @@ export type TActionData = {
   wrapper?: React.FunctionComponent;
 };
 
-type ClutchMessage = 'warn' | 'error';
+type ClutchMessageLevel = 'warn' | 'error';
 
 export type TInstanceState = {
   actions?: Record<string, TActionData>;
   states?: Record<string, unknown>;
   clutchMessages?: {
-    warn?: string;
-    error?: string;
+    warn?: Set<string>;
+    error?: Set<string>;
   };
   actionsState?: {
     [eventName: string]: {
@@ -81,15 +81,11 @@ export type TStore = {
     activeTrail: boolean
   ) => void;
 
-  registerClutchMessage: (
+  setClutchMessage: (
     scopeSelection: TScopeSelection,
-    level: ClutchMessage,
+    shouldShow: boolean,
+    level: ClutchMessageLevel,
     message: string
-  ) => void;
-
-  unregisterClutchMessage: (
-    scopeSelection: TScopeSelection,
-    level: ClutchMessage
   ) => void;
 
   unregisterInstance: (scopeSelection: TScopeSelection) => void;

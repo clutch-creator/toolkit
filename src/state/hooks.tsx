@@ -336,22 +336,9 @@ export const useEventsInstance = (
  */
 export const useClutchWarn = (shouldWarn = false, warnMessage = '') => {
   const scopeSelection = useScopeSelection();
-  const registerClutchMessage = useStore(state => state.registerClutchMessage);
-  const unregisterClutchMessage = useStore(
-    state => state.unregisterClutchMessage
-  );
+  const setClutchMessage = useStore(state => state.setClutchMessage);
 
   useEffect(() => {
-    if (shouldWarn) {
-      registerClutchMessage(scopeSelection, 'warn', warnMessage);
-    } else {
-      unregisterClutchMessage(scopeSelection, 'warn');
-    }
-  }, [
-    shouldWarn,
-    warnMessage,
-    registerClutchMessage,
-    unregisterClutchMessage,
-    scopeSelection,
-  ]);
+    setClutchMessage(scopeSelection, shouldWarn, 'warn', warnMessage);
+  }, [shouldWarn, warnMessage, setClutchMessage, scopeSelection]);
 };

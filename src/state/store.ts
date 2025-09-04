@@ -127,44 +127,6 @@ export const useStore = create<TStore>((set, get) => ({
     }
   },
 
-  registerClutchMessage: (scopeSelection, level, message) => {
-    logger.debug('Registered clutch message', scopeSelection, level, message);
-
-    if (level !== 'warn' && level !== 'error') return;
-
-    const instance = instanceSelector(get(), scopeSelection);
-
-    if (!instance) {
-      set(state => {
-        const newInstances = operateInstance(state.instances, scopeSelection, {
-          actions: {},
-          states: {},
-          select: {},
-          clutchMessages: {
-            [level]: message,
-          },
-        });
-
-        return { instances: newInstances };
-      });
-    } else {
-      instance.clutchMessages = instance.clutchMessages || {};
-      instance.clutchMessages[level] = message;
-    }
-  },
-
-  unregisterClutchMessage: (scopeSelection, level) => {
-    logger.debug('Unregistered clutch message', scopeSelection, level);
-
-    if (level !== 'warn' && level !== 'error') return;
-
-    const instance = instanceSelector(get(), scopeSelection);
-
-    if (instance?.clutchMessages?.[level] !== undefined) {
-      delete instance?.clutchMessages?.[level];
-    }
-  },
-
   unregisterInstance: scopeSelection => {
     set(state => {
       logger.debug('Unregistered Instance', scopeSelection);
@@ -258,6 +220,28 @@ export const useStore = create<TStore>((set, get) => ({
     const state = get();
 
     state.styleSelectors[selectionId] = styleSelectors;
+  },
+
+  setClutchMessage: (scopeSelection, shouldShow, level, message) => {
+    set(state => {
+      const instance = getInstance(state, scopeSelection);
+      const clutchMessages = { ...(instance.clutchMessages ?? {}) };
+
+      clutchMessages[level] ??= new Set();
+
+      if (shouldShow) {
+        clutchMessages[level].add(message);
+      } else {
+        clutchMessages[level].delete(message);
+      }
+
+      const newInstances = operateInstance(state.instances, scopeSelection, {
+        ...instance,
+        clutchMessages,
+      });
+
+      return { instances: newInstances };
+    });
   },
 }));
 
