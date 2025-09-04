@@ -149,7 +149,7 @@ export const useStore = create<TStore>((set, get) => ({
       });
     } else {
       instance.clutchMessages = instance.clutchMessages || {};
-      instance.clutchMessages[level] = message || 'Instance error';
+      instance.clutchMessages[level] = message;
     }
   },
 
