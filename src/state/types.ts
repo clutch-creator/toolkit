@@ -28,7 +28,10 @@ export type TActionData = {
   wrapper?: React.FunctionComponent;
 };
 
-type ClutchMessageLevel = 'warn' | 'error';
+export enum MessageLevel {
+  WARN = 'warn',
+  ERROR = 'error',
+}
 
 export type TInstanceState = {
   actions?: Record<string, TActionData>;
@@ -83,8 +86,8 @@ export type TStore = {
 
   setClutchMessage: (
     scopeSelection: TScopeSelection,
+    level: MessageLevel,
     shouldShow: boolean,
-    level: ClutchMessageLevel,
     message: string
   ) => void;
 

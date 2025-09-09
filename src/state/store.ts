@@ -222,7 +222,7 @@ export const useStore = create<TStore>((set, get) => ({
     state.styleSelectors[selectionId] = styleSelectors;
   },
 
-  setClutchMessage: (scopeSelection, shouldShow, level, message) => {
+  setClutchMessage: (scopeSelection, level, shouldShow, message) => {
     set(state => {
       const instance = getInstance(state, scopeSelection);
       const clutchMessages = { ...(instance.clutchMessages ?? {}) };
