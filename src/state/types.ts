@@ -36,7 +36,7 @@ export enum MessageLevel {
 export type TInstanceState = {
   actions?: Record<string, TActionData>;
   states?: Record<string, unknown>;
-  clutchMessages?: {
+  messages?: {
     warn?: Set<string>;
     error?: Set<string>;
   };
@@ -84,7 +84,7 @@ export type TStore = {
     activeTrail: boolean
   ) => void;
 
-  setClutchMessage: (
+  setInstanceMessage: (
     scopeSelection: TScopeSelection,
     level: MessageLevel,
     shouldShow: boolean,

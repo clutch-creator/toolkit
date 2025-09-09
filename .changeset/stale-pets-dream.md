@@ -2,4 +2,4 @@
 '@clutch-creator/toolkit': minor
 ---
 
-Add useClutchWarn hook
+Add useWarn hook
