@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.10.0
+
+### Minor Changes
+
+- f853b70: Add useWarn hook
+
 ## 1.9.2
 
 ### Patch Changes
