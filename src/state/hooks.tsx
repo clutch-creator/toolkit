@@ -12,7 +12,12 @@ import {
 import { getSerializedScope } from './helpers.js';
 import { closestInstanceSelector } from './selectors.js';
 import { store, useStore } from './store.js';
-import { TActionData, TInstanceState, TScopeSelection } from './types.js';
+import {
+  MessageLevel,
+  TActionData,
+  TInstanceState,
+  TScopeSelection,
+} from './types.js';
 
 export const useScopeSelection = () => {
   const scopeContext = useContext(StateScopeContext);
@@ -327,4 +332,24 @@ export const useEventsInstance = (
     setLoading,
     render,
   };
+};
+
+/**
+ * Hook to set a warning message in Clutch
+ *
+ * @param shouldWarn true if Clutch should show a warning
+ * @param warnMessage message to show
+ */
+export const useClutchWarn = (shouldWarn: boolean, warnMessage: string) => {
+  const scopeSelection = useScopeSelection();
+  const setClutchMessage = useStore(state => state.setClutchMessage);
+
+  useEffect(() => {
+    setClutchMessage(
+      scopeSelection,
+      MessageLevel.WARN,
+      shouldWarn,
+      warnMessage
+    );
+  }, [shouldWarn, warnMessage, setClutchMessage, scopeSelection]);
 };

@@ -221,6 +221,28 @@ export const useStore = create<TStore>((set, get) => ({
 
     state.styleSelectors[selectionId] = styleSelectors;
   },
+
+  setClutchMessage: (scopeSelection, level, shouldShow, message) => {
+    set(state => {
+      const instance = getInstance(state, scopeSelection);
+      const clutchMessages = { ...(instance.clutchMessages ?? {}) };
+
+      clutchMessages[level] ??= new Set();
+
+      if (shouldShow) {
+        clutchMessages[level].add(message);
+      } else {
+        clutchMessages[level].delete(message);
+      }
+
+      const newInstances = operateInstance(state.instances, scopeSelection, {
+        ...instance,
+        clutchMessages,
+      });
+
+      return { instances: newInstances };
+    });
+  },
 }));
 
 export const store = useStore;
