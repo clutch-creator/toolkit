@@ -33,8 +33,6 @@ export type FormState = {
   isValid?: boolean;
   isValidating?: boolean;
   isDirty?: boolean;
-  dirtyFields?: Record<string, boolean>;
-  touchedFields?: Record<string, boolean>;
   errors?: Record<string, string>;
   defaultValues?: Record<string, unknown>;
   mode?: FormMode;

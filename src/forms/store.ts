@@ -1,34 +1,55 @@
 import { create } from 'zustand';
-import type { FieldState, FormMode, FormsStore } from './types.js';
+import type { FieldState, FormsStore, FormState } from './types.js';
+
+const DEFAULT_FORM_STATE: FormState = {
+  fields: {},
+  isSubmitting: false,
+  isSubmitted: false,
+  isSubmitSuccessful: false,
+  submitCount: 0,
+  isValid: true,
+  isValidating: false,
+  isDirty: false,
+  errors: {},
+  defaultValues: {},
+  mode: 'onSubmit',
+  reValidateMode: 'onChange',
+  shouldFocusError: true,
+};
+
+const getForm = (
+  forms: FormsStore['forms'],
+  formId: string,
+  initialState: Partial<FormState>
+): FormState => {
+  const form = forms[formId];
+
+  if (!form) {
+    return {
+      ...DEFAULT_FORM_STATE,
+      ...initialState,
+    };
+  }
+
+  return form;
+};
 
 export const useFormsStore = create<FormsStore>((set, get) => ({
   forms: {},
 
   // Form management
   createForm: (formId, options = {}) => {
-    set(state => ({
-      forms: {
-        ...state.forms,
-        [formId]: {
-          fields: {},
-          isSubmitting: false,
-          isSubmitted: false,
-          isSubmitSuccessful: false,
-          submitCount: 0,
-          isValid: true,
-          isValidating: false,
-          isDirty: false,
-          dirtyFields: {},
-          touchedFields: {},
-          errors: {},
-          defaultValues: {},
-          mode: 'onSubmit',
-          reValidateMode: 'onChange',
-          shouldFocusError: true,
-          ...options,
+    const form = get().forms[formId];
+    const newForm = getForm(get().forms, formId, options);
+
+    if (form !== newForm) {
+      set(state => ({
+        forms: {
+          ...state.forms,
+          [formId]: newForm,
         },
-      },
-    }));
+      }));
+    }
   },
 
   destroyForm: formId => {
@@ -54,7 +75,7 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
 
         resetFields[fieldName] = {
           ...field,
-          value: values[fieldName] ?? field.defaultValue ?? '',
+          value: undefined,
           error: undefined,
           errors: undefined,
           touched: false,
@@ -77,8 +98,6 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
             isValid: true,
             isValidating: false,
             isDirty: false,
-            dirtyFields: {},
-            touchedFields: {},
             errors: {},
             defaultValues: { ...form.defaultValues, ...values },
           },
@@ -90,29 +109,13 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
   // Field registration
   registerField: (formId, fieldName, config = {}) => {
     set(state => {
-      const form = state.forms[formId] || {
-        fields: {},
-        isSubmitting: false,
-        isSubmitted: false,
-        isSubmitSuccessful: false,
-        submitCount: 0,
-        isValid: true,
-        isValidating: false,
-        isDirty: false,
-        dirtyFields: {},
-        touchedFields: {},
-        errors: {},
-        defaultValues: {},
-        mode: 'onSubmit' as FormMode,
-        reValidateMode: 'onChange' as FormMode,
-        shouldFocusError: true,
-      };
+      const form = getForm(state.forms, formId, {});
 
       const existingField = form.fields[fieldName];
       const defaultValue =
         config.defaultValue ?? existingField?.defaultValue ?? '';
 
-      form.fields[fieldName] = {
+      const newField = {
         error: undefined,
         errors: undefined,
         touched: false,
@@ -128,7 +131,13 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
       return {
         forms: {
           ...state.forms,
-          [formId]: form,
+          [formId]: {
+            ...form,
+            fields: {
+              ...form.fields,
+              [fieldName]: newField,
+            },
+          },
         },
       };
     });
@@ -141,10 +150,6 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
       if (!form) return state;
 
       const { [fieldName]: removedField, ...remainingFields } = form.fields;
-      const { [fieldName]: removedDirty, ...remainingDirty } =
-        form.dirtyFields || {};
-      const { [fieldName]: removedTouched, ...remainingTouched } =
-        form.touchedFields || {};
       const { [fieldName]: removedError, ...remainingErrors } =
         form.errors || {};
 
@@ -154,8 +159,6 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
           [formId]: {
             ...form,
             fields: remainingFields,
-            dirtyFields: remainingDirty,
-            touchedFields: remainingTouched,
             errors: remainingErrors,
           },
         },
@@ -218,27 +221,18 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
         touched: shouldTouch || field.touched,
       };
 
+      const updatedFields = {
+        ...form.fields,
+        [fieldName]: updatedField,
+      };
+
+      // Derive isDirty from individual field states
+      const isDirty = Object.values(updatedFields).some(f => f.dirty);
+
       const updatedForm = {
         ...form,
-        fields: {
-          ...form.fields,
-          [fieldName]: updatedField,
-        },
-        dirtyFields: {
-          ...form.dirtyFields,
-          [fieldName]: shouldDirty,
-        },
-        touchedFields: shouldTouch
-          ? {
-              ...form.touchedFields,
-              [fieldName]: true,
-            }
-          : form.touchedFields,
-        isDirty:
-          shouldDirty ||
-          Object.values({ ...form.dirtyFields, [fieldName]: shouldDirty }).some(
-            Boolean
-          ),
+        fields: updatedFields,
+        isDirty,
       };
 
       return {
@@ -590,10 +584,6 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
                 touched,
               },
             },
-            touchedFields: {
-              ...form.touchedFields,
-              [fieldName]: touched,
-            },
           },
         },
       };
@@ -606,27 +596,24 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
 
       if (!form || !form.fields[fieldName]) return state;
 
+      const updatedFields = {
+        ...form.fields,
+        [fieldName]: {
+          ...form.fields[fieldName],
+          dirty,
+        },
+      };
+
+      // Derive isDirty from individual field states
+      const isDirty = Object.values(updatedFields).some(f => f.dirty);
+
       return {
         forms: {
           ...state.forms,
           [formId]: {
             ...form,
-            fields: {
-              ...form.fields,
-              [fieldName]: {
-                ...form.fields[fieldName],
-                dirty,
-              },
-            },
-            dirtyFields: {
-              ...form.dirtyFields,
-              [fieldName]: dirty,
-            },
-            isDirty:
-              dirty ||
-              Object.values({ ...form.dirtyFields, [fieldName]: dirty }).some(
-                Boolean
-              ),
+            fields: updatedFields,
+            isDirty,
           },
         },
       };

@@ -35,8 +35,6 @@ export function useForm(formId: string, options?: Partial<FormState>) {
     isValid: true,
     isValidating: false,
     isDirty: false,
-    dirtyFields: {},
-    touchedFields: {},
     errors: {},
     defaultValues: {},
     mode: 'onSubmit' as FormMode,
@@ -255,6 +253,17 @@ export function useFormState(formId: string) {
   const store = useFormsStore();
   const form = store.forms[formId];
 
+  // Derive dirtyFields and touchedFields from individual field states
+  const dirtyFields: Record<string, boolean> = {};
+  const touchedFields: Record<string, boolean> = {};
+
+  if (form?.fields) {
+    Object.entries(form.fields).forEach(([fieldName, field]) => {
+      dirtyFields[fieldName] = field.dirty || false;
+      touchedFields[fieldName] = field.touched || false;
+    });
+  }
+
   return {
     isDirty: form?.isDirty || false,
     isLoading: form?.isValidating || false,
@@ -264,8 +273,8 @@ export function useFormState(formId: string) {
     isValid: form?.isValid || true,
     isValidating: form?.isValidating || false,
     submitCount: form?.submitCount || 0,
-    dirtyFields: form?.dirtyFields || {},
-    touchedFields: form?.touchedFields || {},
+    dirtyFields,
+    touchedFields,
     errors: form?.errors || {},
   };
 }
