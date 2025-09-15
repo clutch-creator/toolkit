@@ -24,7 +24,7 @@ export function useForm(formId: string, options?: Partial<FormState>) {
       // store.destroyForm(formId);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formId, store]);
+  }, [formId]);
 
   const form = store.forms[formId] || {
     fields: {},
@@ -91,43 +91,6 @@ export function useForm(formId: string, options?: Partial<FormState>) {
     ...form,
     formState: form,
 
-    // Field registration
-    register: (fieldName: string, rules?: ValidationRule) => {
-      store.registerField(formId, fieldName, { rules });
-
-      const field = form.fields[fieldName] || {
-        value: '',
-        error: undefined,
-        touched: false,
-      };
-
-      return {
-        name: fieldName,
-        onChange: (event: React.ChangeEvent<HTMLInputElement> | unknown) => {
-          const value =
-            event && typeof event === 'object' && 'target' in event
-              ? (event as React.ChangeEvent<HTMLInputElement>).target.value
-              : event;
-
-          // setFieldValue now handles validation, touching, and dirty state internally
-          store.setFieldValue(formId, fieldName, value);
-        },
-        onBlur: () => {
-          store.setFieldTouched(formId, fieldName, true);
-          if (form.mode === 'onBlur' || form.reValidateMode === 'onBlur') {
-            store.validateField(formId, fieldName);
-          }
-        },
-        value: field.value,
-        ref: (element: HTMLElement | null) => {
-          // Focus management for errors
-          if (form.shouldFocusError && field.error && element) {
-            element.focus();
-          }
-        },
-      };
-    },
-
     // Methods
     handleSubmit,
     reset: (values?: Record<string, unknown>) =>
@@ -142,16 +105,6 @@ export function useForm(formId: string, options?: Partial<FormState>) {
       store.clearErrors(formId, fieldNames),
     trigger: (fieldNames?: string | string[]) =>
       store.trigger(formId, fieldNames),
-    unregister: (fieldName: string) => store.unregisterField(formId, fieldName),
-
-    // Form control methods
-    setFocus: (fieldName: string) => {
-      const element = document.querySelector(
-        `[name="${fieldName}"]`
-      ) as HTMLElement;
-
-      element?.focus();
-    },
   };
 }
 
@@ -170,7 +123,8 @@ export function useFormField(
       // Optionally unregister on unmount
       // store.unregisterField(formId, fieldName);
     };
-  }, [formId, fieldName, store, rules]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formId, fieldName, rules]);
 
   const form = store.forms[formId];
   const field = form?.fields[fieldName] || {

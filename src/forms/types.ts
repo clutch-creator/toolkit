@@ -6,8 +6,19 @@ export type ValidationRule = {
   minLength?: number | { value: number; message: string };
   maxLength?: number | { value: number; message: string };
   validate?:
-    | ((value: unknown) => string | boolean | undefined)
-    | Record<string, (value: unknown) => string | boolean | undefined>;
+    | ((
+        value: unknown
+      ) => string | boolean | undefined | Promise<string | boolean | undefined>)
+    | Record<
+        string,
+        (
+          value: unknown
+        ) =>
+          | string
+          | boolean
+          | undefined
+          | Promise<string | boolean | undefined>
+      >;
 };
 
 export type FieldState = {

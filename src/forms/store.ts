@@ -72,10 +72,12 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
 
       Object.keys(form.fields).forEach(fieldName => {
         const field = form.fields[fieldName];
+        const newDefaultValue = values[fieldName] ?? field.defaultValue;
 
         resetFields[fieldName] = {
           ...field,
-          value: undefined,
+          value: newDefaultValue,
+          defaultValue: newDefaultValue,
           error: undefined,
           errors: undefined,
           touched: false,
