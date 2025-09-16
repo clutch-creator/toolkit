@@ -7,6 +7,7 @@ type FormsState = {
   destroyForm: (formId: string) => void;
   resetForm: (formId: string, defaultValues?: Record<string, unknown>) => void;
   setFormState: (formId: string, state: Partial<FormState>) => void;
+  submitForm: (formId: string, event?: React.FormEvent) => Promise<void>;
   registerField: (
     formId: string,
     fieldName: string,
@@ -31,6 +32,25 @@ type FormsState = {
 export const selectForm = (state: FormsState, formId: string) =>
   state.forms[formId];
 
+export const selectFormFieldErrors = (state: FormsState, formId: string) => {
+  const form = state.forms[formId];
+
+  if (!form) return {};
+
+  return Object.keys(form.fields).reduce(
+    (acc, fieldName) => {
+      const field = form.fields[fieldName];
+
+      if (field.error) {
+        acc[fieldName] = field.error;
+      }
+
+      return acc;
+    },
+    {} as Record<string, string>
+  );
+}
+
 export const selectFormState = (state: FormsState, formId: string) => {
   const form = state.forms[formId];
 
@@ -42,6 +62,9 @@ export const selectFormState = (state: FormsState, formId: string) => {
     isValid: form.isValid || true,
     isDirty: form.isDirty || false,
     isValidating: form.isValidating || false,
+    error: form.error,
+    response: form.response,
+    fieldErrors: selectFormFieldErrors(state, formId),
   };
 };
 
@@ -144,6 +167,7 @@ export const selectCreateForm = (state: FormsState) => state.createForm;
 export const selectDestroyForm = (state: FormsState) => state.destroyForm;
 export const selectResetForm = (state: FormsState) => state.resetForm;
 export const selectSetFormState = (state: FormsState) => state.setFormState;
+export const selectSubmitForm = (state: FormsState) => state.submitForm;
 export const selectRegisterField = (state: FormsState) => state.registerField;
 export const selectSetFieldValue = (state: FormsState) => state.setFieldValue;
 export const selectSetFieldTouched = (state: FormsState) =>

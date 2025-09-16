@@ -57,19 +57,34 @@ describe('Forms Hooks', () => {
       };
 
       const { result: fieldResult } = renderHook(
-        () => useFormField({ name: 'testField' }),
+        () =>
+          useFormField({
+            name: 'testField',
+            defaultValue: 'initial',
+            required: true,
+            requiredMessage: 'Field is required',
+          }),
         { wrapper }
       );
 
-      expect(fieldResult.current.fieldProps).toBeDefined();
-      expect(fieldResult.current.fieldState).toBeDefined();
-      expect(fieldResult.current.fieldProps.name).toBe('testField');
-      expect(fieldResult.current.fieldState.invalid).toBe(false);
+      expect(fieldResult.current.value).toBe('initial');
+      expect(fieldResult.current.onChange).toBeDefined();
+      expect(fieldResult.current.onBlur).toBeDefined();
+      expect(fieldResult.current.isInvalid).toBe(false);
+      expect(fieldResult.current.isDirty).toBe(false);
+      expect(fieldResult.current.isTouched).toBe(false);
+      expect(fieldResult.current.isValidating).toBe(false);
+      expect(fieldResult.current.isValid).toBe(true);
     });
 
     it('should throw error when used outside FormProvider', () => {
       expect(() => {
-        renderHook(() => useFormField({ name: 'testField' }));
+        renderHook(() =>
+          useFormField({
+            name: 'testField',
+            required: true,
+          })
+        );
       }).toThrow('useFormId must be used within a FormProvider');
     });
   });

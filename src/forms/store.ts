@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { selectFormValues } from './selectors.js';
 import type { FieldState, FormsStore, FormState } from './types.js';
 
 // Module-level debounce timers - no need to be in store state
@@ -136,7 +137,6 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
         defaultValue,
         ...existingField,
         ...config,
-        value: existingField?.value ?? defaultValue,
       };
 
       return {
@@ -161,8 +161,6 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
       if (!form) return state;
 
       const { [fieldName]: removedField, ...remainingFields } = form.fields;
-      const { [fieldName]: removedError, ...remainingErrors } =
-        form.errors || {};
 
       return {
         forms: {
@@ -170,7 +168,6 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
           [formId]: {
             ...form,
             fields: remainingFields,
-            errors: remainingErrors,
           },
         },
       };
@@ -282,13 +279,8 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
     // Set new timer
     const timer = setTimeout(async () => {
       try {
-        const isValid = await get().validateForm(formId);
-
-        if (isValid && form.onSubmit) {
-          const formValues = get().getValues(formId) as Record<string, unknown>;
-
-          await form.onSubmit(formValues);
-        }
+        // Use the centralized submitForm action
+        await get().submitForm(formId);
       } catch (error) {
         // Submit on change failed - could be logged
         // eslint-disable-next-line no-console
@@ -659,5 +651,91 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
         },
       },
     }));
+  },
+
+  // Form submission
+  submitForm: async (formId, event) => {
+    const form = get().forms[formId];
+
+    if (!form) return;
+
+    // Prevent default form submission if event provided
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    // Validate form before submitting
+    const isValid = await get().validateForm(formId);
+
+    if (!isValid) return;
+
+    // Set submitting state
+    get().setFormState(formId, {
+      isSubmitting: true,
+      isSubmitSuccessful: false,
+      submitError: undefined,
+      successMessage: undefined,
+    });
+
+    try {
+      const values = selectFormValues(get(), formId);
+
+      // Clear any existing field errors
+      get().clearErrors(formId);
+
+      const result = await form.onSubmit?.(values);
+
+      if (result && typeof result === 'object') {
+        // Process each action response
+        let hasError = false;
+        let successMessage: string | undefined;
+
+        for (const [_actionName, response] of Object.entries(result)) {
+          if (response.error) {
+            hasError = true;
+            get().setFormState(formId, { error: response.error });
+          }
+
+          if (response.fieldErrors) {
+            hasError = true;
+            get().setError(formId, response.fieldErrors);
+          }
+
+          if (response.successMessage) {
+            successMessage = response.successMessage;
+          }
+        }
+
+        // Set final state
+        get().setFormState(formId, {
+          isSubmitting: false,
+          isSubmitted: true,
+          isSubmitSuccessful: !hasError,
+          submitCount: (form.submitCount ?? 0) + 1,
+          ...(successMessage && !hasError && { successMessage }),
+        });
+      } else {
+        // Handle simple void response
+        get().setFormState(formId, {
+          isSubmitting: false,
+          isSubmitted: true,
+          isSubmitSuccessful: true,
+          submitCount: (form.submitCount ?? 0) + 1,
+        });
+      }
+    } catch (error) {
+      // Handle thrown errors
+      const errorMessage =
+        error instanceof Error ? error.message : 'Submit failed';
+
+      get().setFormState(formId, {
+        isSubmitting: false,
+        isSubmitted: true,
+        isSubmitSuccessful: false,
+        submitError: errorMessage,
+        submitCount: (form.submitCount ?? 0) + 1,
+      });
+    }
   },
 }));

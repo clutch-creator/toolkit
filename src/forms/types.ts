@@ -39,7 +39,6 @@ export type ValidationRule = BaseValidationRule &
 
 export type FieldState = {
   value: unknown;
-  error?: string;
   errors?: string[];
   touched?: boolean;
   dirty?: boolean;
@@ -51,6 +50,16 @@ export type FieldState = {
 
 export type FormMode = 'onSubmit' | 'onBlur' | 'onChange' | 'onTouched' | 'all';
 
+export type SubmitResponse = Record<
+  string,
+  {
+    values?: Record<string, unknown>;
+    successMessage?: string;
+    error?: string;
+    fieldErrors?: Record<string, string>;
+  }
+>;
+
 export type FormState = {
   fields: Record<string, FieldState>;
   isSubmitting?: boolean;
@@ -60,22 +69,22 @@ export type FormState = {
   isValid?: boolean;
   isValidating?: boolean;
   isDirty?: boolean;
-  errors?: Record<string, string>;
+  error?: string;
   defaultValues?: Record<string, unknown>;
   mode?: FormMode;
   reValidateMode?: FormMode;
   shouldFocusError?: boolean;
   submitOnChange?: boolean;
   debounceTime?: number;
+  successMessage?: string;
+  submitError?: string;
   onSubmit?: (
-    values: Record<string, unknown>,
-    event?: React.FormEvent
-  ) => void | Promise<void>;
+    values: Record<string, unknown>
+  ) => void | Promise<void | SubmitResponse>;
 };
 
 export type SubmitHandler<T = Record<string, unknown>> = (
-  data: T,
-  event?: React.BaseSyntheticEvent
+  data: T
 ) => void | Promise<void>;
 
 export type SubmitErrorHandler = (
@@ -125,6 +134,9 @@ export type FormsStore = {
     touched?: boolean
   ) => void;
   setFieldDirty: (formId: string, fieldName: string, dirty?: boolean) => void;
+
+  // Form submission
+  submitForm: (formId: string, event?: React.FormEvent) => Promise<void>;
 
   // Form state
   setFormState: (formId: string, state: Partial<FormState>) => void;
