@@ -39,6 +39,7 @@ export type ValidationRule = BaseValidationRule &
 
 export type FieldState = {
   value: unknown;
+  error?: string;
   errors?: string[];
   touched?: boolean;
   dirty?: boolean;
@@ -70,6 +71,7 @@ export type FormState = {
   isValidating?: boolean;
   isDirty?: boolean;
   error?: string;
+  errors?: Record<string, string>;
   defaultValues?: Record<string, unknown>;
   mode?: FormMode;
   reValidateMode?: FormMode;
@@ -81,6 +83,16 @@ export type FormState = {
   onSubmit?: (
     values: Record<string, unknown>
   ) => void | Promise<void | SubmitResponse>;
+};
+
+export type PartialFormState = {
+  isSubmitting?: boolean;
+  isSubmitted?: boolean;
+  isValid?: boolean;
+  isDirty?: boolean;
+  isValidating?: boolean;
+  error?: string | undefined;
+  fieldErrors: Record<string, string>;
 };
 
 export type SubmitHandler<T = Record<string, unknown>> = (

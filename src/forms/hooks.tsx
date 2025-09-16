@@ -16,7 +16,7 @@ import {
   selectSubmitForm,
 } from './selectors.js';
 import { useFormsStore } from './store.js';
-import type { ValidationRule } from './types.js';
+import type { PartialFormState, ValidationRule } from './types.js';
 
 export interface UseFormOptions {
   id?: string;
@@ -71,10 +71,8 @@ export function useForm(options: UseFormOptions) {
   }, [
     createForm,
     debounceTime,
-    stableDefaultValues,
     destroyForm,
     formId,
-    onSubmit,
     stableOnSubmit,
     submitOnChange,
   ]);
@@ -100,13 +98,30 @@ export function useForm(options: UseFormOptions) {
   };
 }
 
-export function useFormState(formId: string) {
-  return useFormsStore(state => selectFormState(state, formId));
+export function useFormState(formId: string): PartialFormState {
+  const formState = useFormsStore(
+    useCallback(state => selectFormState(state, formId), [formId])
+  );
+
+  // Return default values if form doesn't exist
+  if (!formState) {
+    return {
+      isSubmitting: false,
+      isSubmitted: false,
+      isValid: true,
+      isDirty: false,
+      isValidating: false,
+      error: undefined,
+      fieldErrors: {},
+    };
+  }
+
+  return formState;
 }
 
-export function useFormField(props: {
+export function useFormField<T = string>(props: {
   name: string;
-  defaultValue?: unknown;
+  defaultValue?: T | undefined;
   required?: boolean;
   requiredMessage?: string;
   minLength?: number;
@@ -206,16 +221,27 @@ export function useFormField(props: {
   });
 
   return {
-    value: field.value,
+    value: field?.value as T,
     onChange,
     onBlur,
-    isInvalid: !!field.error,
-    isDirty: field.dirty || false,
-    isTouched: field.touched || false,
-    isValidating: field.isValidating || false,
-    isValid: field.isValid !== false,
+    error: field?.error,
+    errors: field?.errors,
+    isInvalid: !!field?.error,
+    isDirty: field?.dirty || false,
+    isTouched: field?.touched || false,
+    isValidating: field?.isValidating || false,
+    isValid: field?.isValid !== false,
   };
 }
+
+export const useFormFieldError = (fieldName: string) => {
+  const formId = useFormId();
+  const fieldError = useFormsStore(
+    state => selectField(state, formId, fieldName)?.error
+  );
+
+  return fieldError;
+};
 
 export const useFormValues = (formId: string) => {
   return useFormsStore(state => selectFormValues(state, formId));

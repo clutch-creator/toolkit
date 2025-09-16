@@ -139,6 +139,11 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
         ...config,
       };
 
+      // Ensure value is set to defaultValue if not provided
+      if (newField.value === undefined) {
+        newField.value = defaultValue;
+      }
+
       return {
         forms: {
           ...state.forms,

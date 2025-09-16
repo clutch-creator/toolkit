@@ -1,4 +1,22 @@
-import type { FieldState, FormState } from './types.js';
+import type { FieldState, FormState, PartialFormState } from './types.js';
+
+// Cached empty objects to prevent unnecessary re-renders
+const EMPTY_FIELD_ERRORS: Record<string, string> = {};
+const EMPTY_VALUES: Record<string, unknown> = {};
+
+// Cache for memoized results to ensure same content returns same object reference
+const valuesCache = new Map<
+  string,
+  { fields: Record<string, FieldState>; result: Record<string, unknown> }
+>();
+const fieldErrorsCache = new Map<
+  string,
+  { fields: Record<string, FieldState>; result: Record<string, string> }
+>();
+const formStateCache = new Map<
+  string,
+  { form: FormState | undefined; result: PartialFormState }
+>();
 
 // Define FormsState type locally since it's not exported
 type FormsState = {
@@ -35,64 +53,118 @@ export const selectForm = (state: FormsState, formId: string) =>
 export const selectFormFieldErrors = (state: FormsState, formId: string) => {
   const form = state.forms[formId];
 
-  if (!form) return {};
+  if (!form) return EMPTY_FIELD_ERRORS;
 
-  return Object.keys(form.fields).reduce(
+  // Check if there are actually any errors before creating a new object
+  const hasErrors = Object.values(form.fields).some(field => field?.error);
+
+  if (!hasErrors) {
+    return EMPTY_FIELD_ERRORS; // Return the same empty object reference
+  }
+
+  // Check cache for memoization
+  const cached = fieldErrorsCache.get(formId);
+
+  if (cached && cached.fields === form.fields) {
+    return cached.result;
+  }
+
+  // Create new result
+  const result = Object.keys(form.fields).reduce<Record<string, string>>(
     (acc, fieldName) => {
       const field = form.fields[fieldName];
 
-      if (field.error) {
+      if (field?.error) {
         acc[fieldName] = field.error;
       }
 
       return acc;
     },
-    {} as Record<string, string>
+    {}
   );
-}
 
-export const selectFormState = (state: FormsState, formId: string) => {
+  // Cache the result
+  fieldErrorsCache.set(formId, { fields: form.fields, result });
+
+  return result;
+};
+
+export const selectFormState = (
+  state: FormsState,
+  formId: string
+): PartialFormState | undefined => {
   const form = state.forms[formId];
 
-  if (!form) return null;
+  // Cache this result based on form reference
+  const cacheKey = `formState-${formId}`;
+  const cached = formStateCache.get(cacheKey);
 
-  return {
-    isSubmitting: form.isSubmitting || false,
-    isSubmitted: form.isSubmitted || false,
-    isValid: form.isValid || true,
-    isDirty: form.isDirty || false,
-    isValidating: form.isValidating || false,
-    error: form.error,
-    response: form.response,
+  if (cached && cached.form === form) {
+    return cached.result;
+  }
+
+  // Create new result
+  const result: PartialFormState = {
+    isSubmitting: form?.isSubmitting || false,
+    isSubmitted: form?.isSubmitted || false,
+    isValid: form?.isValid || true,
+    isDirty: form?.isDirty || false,
+    isValidating: form?.isValidating || false,
+    error: form?.error,
     fieldErrors: selectFormFieldErrors(state, formId),
   };
+
+  // Cache the result
+  formStateCache.set(cacheKey, { form, result });
+
+  return result;
 };
 
 export const selectFormValues = (state: FormsState, formId: string) => {
   const form = state.forms[formId];
 
-  if (!form) return {};
+  if (!form) return EMPTY_VALUES;
 
-  return Object.keys(form.fields).reduce(
+  // Check if there are actually any fields before creating a new object
+  const fieldNames = Object.keys(form.fields);
+
+  if (fieldNames.length === 0) {
+    return EMPTY_VALUES; // Return the same empty object reference
+  }
+
+  // Check cache for memoization
+  const cached = valuesCache.get(formId);
+
+  if (cached && cached.fields === form.fields) {
+    return cached.result;
+  }
+
+  // Create new result
+  const result = fieldNames.reduce(
     (acc, fieldName) => {
-      acc[fieldName] = form.fields[fieldName].value;
+      acc[fieldName] = form.fields[fieldName]?.value;
 
       return acc;
     },
     {} as Record<string, unknown>
   );
+
+  // Cache the result
+  valuesCache.set(formId, { fields: form.fields, result });
+
+  return result;
 };
 
 export const selectFormErrors = (state: FormsState, formId: string) => {
   const form = state.forms[formId];
 
-  if (!form) return {};
+  if (!form) return EMPTY_FIELD_ERRORS;
 
   return Object.keys(form.fields).reduce(
     (acc, fieldName) => {
       const field = form.fields[fieldName];
 
-      if (field.error) {
+      if (field?.error) {
         acc[fieldName] = field.error;
       }
 
