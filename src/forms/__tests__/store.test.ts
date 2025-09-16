@@ -267,10 +267,8 @@ describe('Forms Store', () => {
     it('should validate pattern rules', async () => {
       useFormsStore.getState().registerField('test-form', 'email', {
         rules: {
-          pattern: {
-            value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-            message: 'Invalid email format',
-          },
+          pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+          patternMessage: 'Invalid email format',
         },
       });
 

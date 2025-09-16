@@ -389,49 +389,27 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
             (Array.isArray(value) && value.length === 0);
 
           if (isEmpty) {
-            error =
-              typeof rules.required === 'string'
-                ? rules.required
-                : 'This field is required';
+            error = rules.requiredMessage || 'This field is required';
           }
         }
 
         // Pattern validation
         if (!error && rules.pattern && value) {
-          const patternRule = rules.pattern;
-          const pattern =
-            patternRule instanceof RegExp ? patternRule : patternRule.value;
-
-          if (!pattern.test(String(value))) {
-            error =
-              patternRule instanceof RegExp
-                ? 'Invalid format'
-                : patternRule.message;
+          if (!rules.pattern.test(String(value))) {
+            error = rules.patternMessage || 'Invalid format';
           }
         }
 
         // Min/Max validation
         if (!error && typeof value === 'number') {
           if (rules.min !== undefined) {
-            const min =
-              typeof rules.min === 'object' ? rules.min.value : rules.min;
-
-            if (value < min) {
-              error =
-                typeof rules.min === 'object'
-                  ? rules.min.message
-                  : `Minimum value is ${min}`;
+            if (value < rules.min) {
+              error = rules.minMessage || `Value must be at least ${rules.min}`;
             }
           }
           if (rules.max !== undefined) {
-            const max =
-              typeof rules.max === 'object' ? rules.max.value : rules.max;
-
-            if (value > max) {
-              error =
-                typeof rules.max === 'object'
-                  ? rules.max.message
-                  : `Maximum value is ${max}`;
+            if (value > rules.max) {
+              error = rules.maxMessage || `Value must be at most ${rules.max}`;
             }
           }
         }
@@ -439,29 +417,17 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
         // MinLength/MaxLength validation
         if (!error && typeof value === 'string') {
           if (rules.minLength !== undefined) {
-            const minLength =
-              typeof rules.minLength === 'object'
-                ? rules.minLength.value
-                : rules.minLength;
-
-            if (value.length < minLength) {
+            if (value.length < rules.minLength) {
               error =
-                typeof rules.minLength === 'object'
-                  ? rules.minLength.message
-                  : `Minimum length is ${minLength}`;
+                rules.minLengthMessage ||
+                `Must be at least ${rules.minLength} characters long`;
             }
           }
           if (rules.maxLength !== undefined) {
-            const maxLength =
-              typeof rules.maxLength === 'object'
-                ? rules.maxLength.value
-                : rules.maxLength;
-
-            if (value.length > maxLength) {
+            if (value.length > rules.maxLength) {
               error =
-                typeof rules.maxLength === 'object'
-                  ? rules.maxLength.message
-                  : `Maximum length is ${maxLength}`;
+                rules.maxLengthMessage ||
+                `Must be at most ${rules.maxLength} characters long`;
             }
           }
         }

@@ -120,10 +120,8 @@ describe('Forms System Tests', () => {
     store.createForm('test-form');
     store.registerField('test-form', 'email', {
       rules: {
-        pattern: {
-          value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-          message: 'Invalid email format',
-        },
+        pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+        patternMessage: 'Invalid email format',
       },
     });
 
@@ -151,8 +149,10 @@ describe('Forms System Tests', () => {
     store.createForm('test-form');
     store.registerField('test-form', 'password', {
       rules: {
-        minLength: { value: 8, message: 'Too short' },
-        maxLength: { value: 20, message: 'Too long' },
+        minLength: 8,
+        minLengthMessage: 'Too short',
+        maxLength: 20,
+        maxLengthMessage: 'Too long',
       },
     });
 

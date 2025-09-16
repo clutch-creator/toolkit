@@ -1,10 +1,6 @@
-export type ValidationRule = {
-  required?: boolean | string;
-  pattern?: RegExp | { value: RegExp; message: string };
-  min?: number | { value: number; message: string };
-  max?: number | { value: number; message: string };
-  minLength?: number | { value: number; message: string };
-  maxLength?: number | { value: number; message: string };
+export type BaseValidationRule = {
+  required?: boolean;
+  requiredMessage?: string;
   validate?:
     | ((
         value: unknown
@@ -20,6 +16,26 @@ export type ValidationRule = {
           | Promise<string | boolean | undefined>
       >;
 };
+
+export type NumberValidationRule = {
+  min?: number;
+  minMessage?: string;
+  max?: number;
+  maxMessage?: string;
+};
+
+export type TextValidationRule = {
+  minLength?: number;
+  minLengthMessage?: string;
+  maxLength?: number;
+  maxLengthMessage?: string;
+  pattern?: RegExp;
+  patternMessage?: string;
+};
+
+export type ValidationRule = BaseValidationRule &
+  NumberValidationRule &
+  TextValidationRule;
 
 export type FieldState = {
   value: unknown;

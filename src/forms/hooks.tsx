@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useFormsStore } from './store.js';
 import type {
   FormMode,
@@ -10,7 +10,20 @@ import type {
   ValidationRule,
 } from './types.js';
 
-export function useForm(formId: string, options?: Partial<FormState>) {
+let formIdCounter = 0;
+
+function useAutoFormId() {
+  return useMemo(() => {
+    formIdCounter += 1;
+
+    return `form-${formIdCounter}`;
+  }, []);
+}
+
+export function useForm(formOptions?: Partial<FormState & { id?: string }>) {
+  const { id, ...options } = formOptions || {};
+  const autoId = useAutoFormId();
+  const formId = id || autoId;
   const store = useFormsStore();
 
   // Initialize form if it doesn't exist
@@ -20,8 +33,10 @@ export function useForm(formId: string, options?: Partial<FormState>) {
     }
 
     return () => {
-      // Optionally clean up form on unmount
-      // store.destroyForm(formId);
+      if (!id) {
+        // Clean up auto-generated form on unmount
+        store.destroyForm(formId);
+      }
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [formId]);
