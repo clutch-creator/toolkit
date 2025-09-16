@@ -125,11 +125,9 @@ describe('Forms Store', () => {
       useFormsStore
         .getState()
         .registerField('test-form', 'name', { defaultValue: 'John' });
-      useFormsStore
-        .getState()
-        .registerField('test-form', 'email', {
-          defaultValue: 'john@example.com',
-        });
+      useFormsStore.getState().registerField('test-form', 'email', {
+        defaultValue: 'john@example.com',
+      });
     });
 
     it('should set field value', () => {

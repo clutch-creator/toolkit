@@ -65,6 +65,12 @@ export type FormState = {
   mode?: FormMode;
   reValidateMode?: FormMode;
   shouldFocusError?: boolean;
+  submitOnChange?: boolean;
+  debounceTime?: number;
+  onSubmit?: (
+    values: Record<string, unknown>,
+    event?: React.FormEvent
+  ) => void | Promise<void>;
 };
 
 export type SubmitHandler<T = Record<string, unknown>> = (
@@ -131,4 +137,5 @@ export type FormsStore = {
     fieldName: string,
     value: unknown
   ) => boolean;
+  _handleSubmitOnChange: (formId: string) => void;
 };

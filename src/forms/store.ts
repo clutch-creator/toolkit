@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import type { FieldState, FormsStore, FormState } from './types.js';
 
+// Module-level debounce timers - no need to be in store state
+const formsDebounceTimers: Record<string, NodeJS.Timeout> = {};
+
 const DEFAULT_FORM_STATE: FormState = {
   fields: {},
   isSubmitting: false,
@@ -53,6 +56,12 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
   },
 
   destroyForm: formId => {
+    // Clean up debounce timer if it exists
+    if (formsDebounceTimers[formId]) {
+      clearTimeout(formsDebounceTimers[formId]);
+      delete formsDebounceTimers[formId];
+    }
+
     set(state => {
       const { [formId]: removedForm, ...remainingForms } = state.forms;
 
@@ -248,6 +257,50 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
     if (shouldValidate) {
       get().validateField(formId, fieldName);
     }
+
+    // Handle submit on change
+    const form = get().forms[formId];
+
+    if (form?.submitOnChange && form.isDirty && form.onSubmit) {
+      get()._handleSubmitOnChange(formId);
+    }
+  },
+
+  _handleSubmitOnChange: (formId: string) => {
+    const state = get();
+    const form = state.forms[formId];
+
+    if (!form?.onSubmit || !form.submitOnChange) return;
+
+    const debounceTime = form.debounceTime || 300;
+
+    // Clear existing timer
+    if (formsDebounceTimers[formId]) {
+      clearTimeout(formsDebounceTimers[formId]);
+    }
+
+    // Set new timer
+    const timer = setTimeout(async () => {
+      try {
+        const isValid = await get().validateForm(formId);
+
+        if (isValid && form.onSubmit) {
+          const formValues = get().getValues(formId) as Record<string, unknown>;
+
+          await form.onSubmit(formValues);
+        }
+      } catch (error) {
+        // Submit on change failed - could be logged
+        // eslint-disable-next-line no-console
+        console.warn('Submit on change failed:', error);
+      }
+
+      // Clean up timer
+      delete formsDebounceTimers[formId];
+    }, debounceTime);
+
+    // Store timer
+    formsDebounceTimers[formId] = timer;
   },
 
   setValue: (formId, values) => {
@@ -556,6 +609,13 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
         },
       };
     });
+
+    // Validate field if form mode is onBlur or all
+    const form = get().forms[formId];
+
+    if (touched && form && (form.mode === 'onBlur' || form.mode === 'all')) {
+      get().validateField(formId, fieldName);
+    }
   },
 
   setFieldDirty: (formId, fieldName, dirty = true) => {
