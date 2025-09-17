@@ -81,18 +81,16 @@ export type FormState = {
   debounceTime?: number;
   successMessage?: string;
   submitError?: string;
-  onSubmit?: (
-    values: Record<string, unknown>
-  ) => void | Promise<void | SubmitResponse>;
+  onSubmit?: (values: Record<string, unknown>) => unknown | Promise<unknown>;
 };
 
 export type PartialFormState = {
-  isSubmitting?: boolean;
-  isSubmitted?: boolean;
-  isValid?: boolean;
-  isDirty?: boolean;
-  isValidating?: boolean;
-  error?: string | undefined;
+  isSubmitting: boolean;
+  isSubmitted: boolean;
+  isValid: boolean;
+  isDirty: boolean;
+  isValidating: boolean;
+  error: string | undefined;
 };
 
 export type SubmitHandler<T = Record<string, unknown>> = (

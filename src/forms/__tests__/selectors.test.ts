@@ -36,9 +36,9 @@ describe('Forms Selectors', () => {
       const form = selectForm(state, 'test-form');
 
       expect(form).toBeDefined();
-      expect(form.fields).toBeDefined();
-      expect(form.fields.name).toBeDefined();
-      expect(form.fields.email).toBeDefined();
+      expect(form?.fields).toBeDefined();
+      expect(form?.fields.name).toBeDefined();
+      expect(form?.fields.email).toBeDefined();
     });
 
     it('should select form state', () => {

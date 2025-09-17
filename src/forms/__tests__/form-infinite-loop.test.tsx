@@ -29,14 +29,13 @@ function Form({
     debounceTime,
   });
 
-  const { isSubmitting, isValid, isValidating, isDirty, error, fieldErrors } =
+  const { isSubmitting, isValid, isValidating, isDirty, error } =
     useFormState(formId);
 
   const values = useFormValues(formId);
 
   // register form states with clutch - this could be causing infinite loops
   stateHooks.useRegisterState<object>('data', values);
-  stateHooks.useRegisterState<object>('fieldErrors', fieldErrors);
   stateHooks.useRegisterState<string | undefined>('formError', error);
   stateHooks.useRegisterState<boolean>('isSubmitting', isSubmitting);
   stateHooks.useRegisterState<boolean>('isValidating', isValidating);

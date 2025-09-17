@@ -11,7 +11,9 @@ const parsePathSegments = (value: string | undefined): string[] => {
   let match;
 
   while ((match = regex.exec(value))) {
-    segments.push(match[1]);
+    if (match[1]) {
+      segments.push(match[1]);
+    }
   }
 
   return segments;

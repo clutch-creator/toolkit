@@ -23,7 +23,7 @@ describe('Forms Validation', () => {
 
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.error).toBe(
+      expect(state.forms['test-form']?.fields.name?.error).toBe(
         'This field is required'
       );
 
@@ -34,7 +34,7 @@ describe('Forms Validation', () => {
       expect(isValid).toBe(true);
 
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.name.error).toBeUndefined();
+      expect(state.forms['test-form']?.fields.name?.error).toBeUndefined();
     });
 
     it('should validate required fields with custom message', async () => {
@@ -54,7 +54,7 @@ describe('Forms Validation', () => {
 
       const state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.error).toBe(
+      expect(state.forms['test-form']?.fields.name?.error).toBe(
         'Name is required'
       );
     });
@@ -75,7 +75,9 @@ describe('Forms Validation', () => {
       expect(isValid).toBe(false);
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.error).toBe('Invalid format');
+      expect(state.forms['test-form']?.fields.name?.error).toBe(
+        'Invalid format'
+      );
 
       // Valid pattern should pass
       store.setFieldValue('test-form', 'name', 'John');
@@ -83,7 +85,7 @@ describe('Forms Validation', () => {
 
       expect(isValid).toBe(true);
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.name.error).toBeUndefined();
+      expect(state.forms['test-form']?.fields.name?.error).toBeUndefined();
     });
 
     it('should validate pattern rules with custom message', async () => {
@@ -102,7 +104,7 @@ describe('Forms Validation', () => {
       expect(isValid).toBe(false);
       const state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.error).toBe(
+      expect(state.forms['test-form']?.fields.name?.error).toBe(
         'Only letters are allowed'
       );
     });
@@ -124,7 +126,7 @@ describe('Forms Validation', () => {
       expect(isValid).toBe(false);
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.age.error).toBe(
+      expect(state.forms['test-form']?.fields.age?.error).toBe(
         'Value must be at least 10'
       );
 
@@ -134,7 +136,7 @@ describe('Forms Validation', () => {
 
       expect(isValid).toBe(false);
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.age.error).toBe(
+      expect(state.forms['test-form']?.fields.age?.error).toBe(
         'Value must be at most 100'
       );
 
@@ -144,7 +146,7 @@ describe('Forms Validation', () => {
 
       expect(isValid).toBe(true);
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.age.error).toBeUndefined();
+      expect(state.forms['test-form']?.fields.age?.error).toBeUndefined();
     });
 
     it('should validate min/max with custom messages', async () => {
@@ -165,7 +167,7 @@ describe('Forms Validation', () => {
       expect(isValid).toBe(false);
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.age.error).toBe(
+      expect(state.forms['test-form']?.fields.age?.error).toBe(
         'Must be at least 18 years old'
       );
 
@@ -174,7 +176,7 @@ describe('Forms Validation', () => {
 
       expect(isValid).toBe(false);
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.age.error).toBe(
+      expect(state.forms['test-form']?.fields.age?.error).toBe(
         'Must be at most 65 years old'
       );
     });
@@ -196,7 +198,7 @@ describe('Forms Validation', () => {
       expect(isValid).toBe(false);
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.username.error).toBe(
+      expect(state.forms['test-form']?.fields.username?.error).toBe(
         'Must be at least 3 characters long'
       );
 
@@ -206,7 +208,7 @@ describe('Forms Validation', () => {
 
       expect(isValid).toBe(false);
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.username.error).toBe(
+      expect(state.forms['test-form']?.fields.username?.error).toBe(
         'Must be at most 10 characters long'
       );
 
@@ -216,7 +218,7 @@ describe('Forms Validation', () => {
 
       expect(isValid).toBe(true);
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.username.error).toBeUndefined();
+      expect(state.forms['test-form']?.fields.username?.error).toBeUndefined();
     });
 
     it('should validate string length with custom messages', async () => {
@@ -238,7 +240,7 @@ describe('Forms Validation', () => {
       expect(isValid).toBe(false);
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.password.error).toBe(
+      expect(state.forms['test-form']?.fields.password?.error).toBe(
         'Password must be at least 5 characters'
       );
 
@@ -252,7 +254,7 @@ describe('Forms Validation', () => {
 
       expect(isValid).toBe(false);
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.password.error).toBe(
+      expect(state.forms['test-form']?.fields.password?.error).toBe(
         'Password must be at most 20 characters'
       );
     });
@@ -275,7 +277,7 @@ describe('Forms Validation', () => {
       expect(isValid).toBe(false);
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].isValid).toBe(false);
+      expect(state.forms['test-form']?.isValid).toBe(false);
 
       // Set valid values
       store.setFieldValue('test-form', 'name', 'John');
@@ -285,7 +287,7 @@ describe('Forms Validation', () => {
 
       expect(isValid).toBe(true);
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].isValid).toBe(true);
+      expect(state.forms['test-form']?.isValid).toBe(true);
     });
   });
 
@@ -303,7 +305,7 @@ describe('Forms Validation', () => {
       expect(isValid).toBe(false);
       const state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.error).toBeDefined();
+      expect(state.forms['test-form']?.fields.name?.error).toBeDefined();
     });
 
     it('should trigger multiple field validation', async () => {
@@ -321,8 +323,8 @@ describe('Forms Validation', () => {
       expect(isValid).toBe(false);
       const state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.error).toBeDefined();
-      expect(state.forms['test-form'].fields.email.error).toBeDefined();
+      expect(state.forms['test-form']?.fields.name?.error).toBeDefined();
+      expect(state.forms['test-form']?.fields.email?.error).toBeDefined();
     });
   });
 });

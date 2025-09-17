@@ -64,9 +64,7 @@ export function useForm(options: UseFormOptions) {
   );
 
   const stableDefaultValues = useRef(defaultValues);
-  const stableOnSubmit = useEvent(onSubmit) as (
-    values: Record<string, unknown>
-  ) => void | Promise<void>;
+  const stableOnSubmit = useEvent(onSubmit);
 
   // Initialize form
   useEffect(() => {

@@ -1,4 +1,5 @@
 import { create } from 'zustand';
+import { logger } from '../utils/logger.js';
 import {
   selectFormValues,
   shouldFieldTouchOnChange,
@@ -86,7 +87,7 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
       const resetFields: Record<string, FieldState> = {};
 
       Object.keys(form.fields).forEach(fieldName => {
-        const field = form.fields[fieldName];
+        const field = form.fields[fieldName]!;
         const newDefaultValue = values[fieldName] ?? field.defaultValue;
 
         resetFields[fieldName] = {
@@ -132,7 +133,8 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
       const defaultValue =
         config.defaultValue ?? existingField?.defaultValue ?? '';
 
-      const newField = {
+      // Build a fully-typed FieldState ensuring 'value' is present
+      const newField: FieldState = {
         error: undefined,
         errors: undefined,
         touched: false,
@@ -140,14 +142,16 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
         isValid: true,
         isValidating: false,
         defaultValue,
-        ...existingField,
-        ...config,
+        // existing values take precedence over defaults
+        ...(existingField as FieldState | undefined),
+        // apply explicit config
+        ...(config as Partial<FieldState>),
+        // ensure value is always defined
+        value:
+          (config as Partial<FieldState>).value ??
+          (existingField as FieldState | undefined)?.value ??
+          defaultValue,
       };
-
-      // Ensure value is set to defaultValue if not provided
-      if (newField.value === undefined) {
-        newField.value = defaultValue;
-      }
 
       return {
         forms: {
@@ -262,8 +266,7 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
         await get().submitForm(formId);
       } catch (error) {
         // Submit on change failed - could be logged
-        // eslint-disable-next-line no-console
-        console.warn('Submit on change failed:', error);
+        logger.warn('Submit on change failed:', error);
       }
 
       // Clean up timer
@@ -506,15 +509,17 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
     const updatedForm = get().forms[formId];
 
     if (updatedForm) {
+      const currentField = updatedForm.fields[fieldName]!;
+
       get().setFormState(formId, {
         fields: {
           ...updatedForm.fields,
           [fieldName]: {
-            ...updatedForm.fields[fieldName],
+            ...currentField,
             isValidating: false,
             isValid: !error,
-          },
-        },
+          } as FieldState,
+        } as Record<string, FieldState>,
       });
     }
 
@@ -621,29 +626,33 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
 
   // Form state
   setFormState: (formId, state) => {
-    set(storeState => ({
-      forms: {
-        ...storeState.forms,
-        [formId]: {
-          ...storeState.forms[formId],
-          ...state,
+    set(storeState => {
+      const baseForm = getForm(storeState.forms, formId);
+
+      return {
+        forms: {
+          ...storeState.forms,
+          [formId]: {
+            ...baseForm,
+            ...state,
+          },
         },
-      },
-    }));
+      };
+    });
   },
 
   // Form submission
   submitForm: async formId => {
     const form = get().forms[formId];
 
-    console.log('Submitting form:', formId, form);
+    logger.log('Submitting form:', formId, form);
 
     if (!form) return;
 
     // Validate form before submitting
     const isValid = await get().validateForm(formId);
 
-    console.log('Form valid:', isValid);
+    logger.log('Form valid:', isValid);
 
     if (!isValid) return;
 
@@ -663,7 +672,7 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
 
       const result = await form.onSubmit?.(values);
 
-      console.log('Form submit result:', result);
+      logger.log('Form submit result:', result);
 
       if (result && typeof result === 'object') {
         // Process each action response

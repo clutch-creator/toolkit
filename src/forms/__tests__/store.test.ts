@@ -17,10 +17,10 @@ describe('Forms Store', () => {
       const form = state.forms['test-form'];
 
       expect(form).toBeDefined();
-      expect(form.isSubmitting).toBe(false);
-      expect(form.isValid).toBe(true);
-      expect(form.isDirty).toBe(false);
-      expect(form.mode).toBe('onSubmit');
+      expect(form?.isSubmitting).toBe(false);
+      expect(form?.isValid).toBe(true);
+      expect(form?.isDirty).toBe(false);
+      expect(form?.mode).toBe('onSubmit');
     });
 
     it('should create a form with custom options', () => {
@@ -35,9 +35,9 @@ describe('Forms Store', () => {
       const state = useFormsStore.getState();
       const form = state.forms['test-form'];
 
-      expect(form.mode).toBe('onChange');
-      expect(form.shouldFocusError).toBe(false);
-      expect(form.defaultValues).toEqual({ name: 'John' });
+      expect(form?.mode).toBe('onChange');
+      expect(form?.shouldFocusError).toBe(false);
+      expect(form?.defaultValues).toEqual({ name: 'John' });
     });
 
     it('should destroy a form', () => {
@@ -65,16 +65,16 @@ describe('Forms Store', () => {
       // Field should be dirty and have updated value
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.value).toBe('Jane');
-      expect(state.forms['test-form'].fields.name.dirty).toBe(true);
+      expect(state.forms['test-form']?.fields.name?.value).toBe('Jane');
+      expect(state.forms['test-form']?.fields.name?.dirty).toBe(true);
 
       // Reset form
       store.resetForm('test-form', { name: 'Bob' });
 
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.name.value).toBe('Bob');
-      expect(state.forms['test-form'].fields.name.dirty).toBe(false);
-      expect(state.forms['test-form'].isDirty).toBe(false);
+      expect(state.forms['test-form']?.fields.name?.value).toBe('Bob');
+      expect(state.forms['test-form']?.fields.name?.dirty).toBe(false);
+      expect(state.forms['test-form']?.isDirty).toBe(false);
     });
   });
 
@@ -91,13 +91,13 @@ describe('Forms Store', () => {
       store.registerField('test-form', 'name');
 
       const state = useFormsStore.getState();
-      const field = state.forms['test-form'].fields.name;
+      const field = state.forms['test-form']?.fields.name;
 
       expect(field).toBeDefined();
-      expect(field.value).toBe('');
-      expect(field.touched).toBe(false);
-      expect(field.dirty).toBe(false);
-      expect(field.isValid).toBe(true);
+      expect(field?.value).toBe('');
+      expect(field?.touched).toBe(false);
+      expect(field?.dirty).toBe(false);
+      expect(field?.isValid).toBe(true);
     });
 
     it('should register a field with custom config', () => {
@@ -109,11 +109,11 @@ describe('Forms Store', () => {
       });
 
       const state = useFormsStore.getState();
-      const field = state.forms['test-form'].fields.name;
+      const field = state.forms['test-form']?.fields.name;
 
-      expect(field.defaultValue).toBe('John');
-      expect(field.value).toBe('John');
-      expect(field.rules?.required).toBe(true);
+      expect(field?.defaultValue).toBe('John');
+      expect(field?.value).toBe('John');
+      expect(field?.rules?.required).toBe(true);
     });
 
     it('should unregister a field', () => {
@@ -123,12 +123,12 @@ describe('Forms Store', () => {
 
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name).toBeDefined();
+      expect(state.forms['test-form']?.fields.name).toBeDefined();
 
       store.unregisterField('test-form', 'name');
 
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.name).toBeUndefined();
+      expect(state.forms['test-form']?.fields.name).toBeUndefined();
     });
   });
 
@@ -146,9 +146,9 @@ describe('Forms Store', () => {
       store.setFieldValue('test-form', 'name', 'Jane');
 
       const state = useFormsStore.getState();
-      const field = state.forms['test-form'].fields.name;
+      const field = state.forms['test-form']?.fields.name;
 
-      expect(field.value).toBe('Jane');
+      expect(field?.value).toBe('Jane');
     });
 
     it('should mark field as dirty when value differs from default', () => {
@@ -157,9 +157,9 @@ describe('Forms Store', () => {
       store.setFieldValue('test-form', 'name', 'Jane');
 
       const state = useFormsStore.getState();
-      const field = state.forms['test-form'].fields.name;
+      const field = state.forms['test-form']?.fields.name;
 
-      expect(field.dirty).toBe(true);
+      expect(field?.dirty).toBe(true);
     });
 
     it('should not mark field as dirty when value equals default', () => {
@@ -168,9 +168,9 @@ describe('Forms Store', () => {
       store.setFieldValue('test-form', 'name', 'John'); // Same as default
 
       const state = useFormsStore.getState();
-      const field = state.forms['test-form'].fields.name;
+      const field = state.forms['test-form']?.fields.name;
 
-      expect(field.dirty).toBe(false);
+      expect(field?.dirty).toBe(false);
     });
 
     it('should update form isDirty based on field states', () => {
@@ -179,13 +179,13 @@ describe('Forms Store', () => {
       // Form should not be dirty initially
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].isDirty).toBe(false);
+      expect(state.forms['test-form']?.isDirty).toBe(false);
 
       // Set field value to different from default
       store.setFieldValue('test-form', 'name', 'Jane');
 
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].isDirty).toBe(true);
+      expect(state.forms['test-form']?.isDirty).toBe(true);
     });
 
     it('should set multiple values', () => {
@@ -197,8 +197,8 @@ describe('Forms Store', () => {
       const state = useFormsStore.getState();
       const form = state.forms['test-form'];
 
-      expect(form.fields.name.value).toBe('Jane');
-      expect(form.fields.email.value).toBe('jane@example.com');
+      expect(form?.fields.name?.value).toBe('Jane');
+      expect(form?.fields.email?.value).toBe('jane@example.com');
     });
 
     it('should get field values', () => {
@@ -240,11 +240,11 @@ describe('Forms Store', () => {
       store.setFieldError('test-form', 'name', 'This field is required');
 
       const state = useFormsStore.getState();
-      const field = state.forms['test-form'].fields.name;
+      const field = state.forms['test-form']?.fields.name;
 
-      expect(field.error).toBe('This field is required');
-      expect(field.errors).toEqual(['This field is required']);
-      expect(field.isValid).toBe(false);
+      expect(field?.error).toBe('This field is required');
+      expect(field?.errors).toEqual(['This field is required']);
+      expect(field?.isValid).toBe(false);
     });
 
     it('should clear field error', () => {
@@ -254,15 +254,15 @@ describe('Forms Store', () => {
 
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.error).toBe(
+      expect(state.forms['test-form']?.fields.name?.error).toBe(
         'This field is required'
       );
 
       store.setFieldError('test-form', 'name', undefined);
 
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.name.error).toBeUndefined();
-      expect(state.forms['test-form'].fields.name.isValid).toBe(true);
+      expect(state.forms['test-form']?.fields.name?.error).toBeUndefined();
+      expect(state.forms['test-form']?.fields.name?.isValid).toBe(true);
     });
 
     it('should update form validity based on field errors', () => {
@@ -271,13 +271,13 @@ describe('Forms Store', () => {
       // Form should be valid initially
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].isValid).toBe(true);
+      expect(state.forms['test-form']?.isValid).toBe(true);
 
       // Set error on field
       store.setFieldError('test-form', 'name', 'This field is required');
 
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].isValid).toBe(false);
+      expect(state.forms['test-form']?.isValid).toBe(false);
     });
 
     it('should set multiple errors at once', () => {
@@ -292,8 +292,8 @@ describe('Forms Store', () => {
       const state = useFormsStore.getState();
       const form = state.forms['test-form'];
 
-      expect(form.fields.name.error).toBe('Name is required');
-      expect(form.fields.email.error).toBe('Email is invalid');
+      expect(form?.fields.name?.error).toBe('Name is required');
+      expect(form?.fields.email?.error).toBe('Email is invalid');
     });
 
     it('should clear errors', () => {
@@ -311,8 +311,8 @@ describe('Forms Store', () => {
 
       let state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.error).toBeUndefined();
-      expect(state.forms['test-form'].fields.email.error).toBe(
+      expect(state.forms['test-form']?.fields.name?.error).toBeUndefined();
+      expect(state.forms['test-form']?.fields.email?.error).toBe(
         'Email is invalid'
       );
 
@@ -320,8 +320,8 @@ describe('Forms Store', () => {
       store.clearErrors('test-form');
 
       state = useFormsStore.getState();
-      expect(state.forms['test-form'].fields.name.error).toBeUndefined();
-      expect(state.forms['test-form'].fields.email.error).toBeUndefined();
+      expect(state.forms['test-form']?.fields.name?.error).toBeUndefined();
+      expect(state.forms['test-form']?.fields.email?.error).toBeUndefined();
     });
   });
 
@@ -345,7 +345,7 @@ describe('Forms Store', () => {
 
       const state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.error).toBe(
+      expect(state.forms['test-form']?.fields.name?.error).toBe(
         'Name is required'
       );
     });
@@ -367,7 +367,7 @@ describe('Forms Store', () => {
 
       const state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.email.error).toBe(
+      expect(state.forms['test-form']?.fields.email?.error).toBe(
         'Invalid email format'
       );
     });
@@ -384,7 +384,7 @@ describe('Forms Store', () => {
 
       const state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].isValid).toBe(false);
+      expect(state.forms['test-form']?.isValid).toBe(false);
     });
 
     it('should trigger validation with different parameters', async () => {
@@ -428,7 +428,7 @@ describe('Forms Store', () => {
 
       const state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.touched).toBe(true);
+      expect(state.forms['test-form']?.fields.name?.touched).toBe(true);
     });
 
     it('should set field dirty state', () => {
@@ -438,7 +438,7 @@ describe('Forms Store', () => {
 
       const state = useFormsStore.getState();
 
-      expect(state.forms['test-form'].fields.name.dirty).toBe(true);
+      expect(state.forms['test-form']?.fields.name?.dirty).toBe(true);
     });
   });
 });
