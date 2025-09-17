@@ -8,7 +8,10 @@ import {
 import type { FieldState, FormsStore, FormState } from './types.js';
 
 // Module-level debounce timers - no need to be in store state
-const formsDebounceTimers: Record<string, NodeJS.Timeout> = {};
+const formsDebounceTimers: Record<
+  string,
+  number | ReturnType<typeof setTimeout>
+> = {};
 
 const DEFAULT_FORM_STATE: FormState = {
   fields: {},
