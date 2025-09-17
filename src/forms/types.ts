@@ -15,6 +15,7 @@ export type BaseValidationRule = {
           | undefined
           | Promise<string | boolean | undefined>
       >;
+  validateMessage?: string;
 };
 
 export type NumberValidationRule = {
@@ -92,7 +93,6 @@ export type PartialFormState = {
   isDirty?: boolean;
   isValidating?: boolean;
   error?: string | undefined;
-  fieldErrors: Record<string, string>;
 };
 
 export type SubmitHandler<T = Record<string, unknown>> = (
@@ -154,12 +154,5 @@ export type FormsStore = {
   setFormState: (formId: string, state: Partial<FormState>) => void;
 
   // Internal utilities
-  _shouldValidateOnChange: (formId: string, fieldName: string) => boolean;
-  _shouldTouchOnChange: (formId: string, fieldName: string) => boolean;
-  _shouldMarkDirty: (
-    formId: string,
-    fieldName: string,
-    value: unknown
-  ) => boolean;
   _handleSubmitOnChange: (formId: string) => void;
 };

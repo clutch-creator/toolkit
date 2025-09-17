@@ -47,7 +47,8 @@ describe('Forms Selectors', () => {
 
       expect(formState).toBeDefined();
       expect(formState?.isSubmitting).toBe(false);
-      expect(formState?.isValid).toBe(true); // Selector uses || true
+      // Form has an error set for email in setup; isValid should be false
+      expect(formState?.isValid).toBe(false);
       expect(formState?.isDirty).toBe(true); // Should be dirty due to name change
     });
 
@@ -74,7 +75,7 @@ describe('Forms Selectors', () => {
       const state = useFormsStore.getState();
 
       expect(selectForm(state, 'non-existent')).toBeUndefined();
-      expect(selectFormState(state, 'non-existent')).toBeNull();
+      expect(selectFormState(state, 'non-existent')).toBeUndefined();
       expect(selectFormValues(state, 'non-existent')).toEqual({});
       expect(selectFormErrors(state, 'non-existent')).toEqual({});
     });

@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import React from 'react';
 import * as stateHooks from '../../state/hooks.js';
@@ -113,14 +113,14 @@ describe('Form Component Infinite Loop Investigation', () => {
     };
 
     // Render the form
-    render(<TestForm />);
+    const utils = render(<TestForm />);
 
     // Wait for initial render
     await new Promise(resolve => setTimeout(resolve, 100));
 
     // Check that the form rendered
-    expect(screen.getByRole('form')).toBeDefined();
-    expect(screen.getByRole('button', { name: 'Submit' })).toBeDefined();
+    expect(utils.container.querySelector('form')).not.toBeNull();
+    expect(utils.getByRole('button', { name: 'Submit' })).toBeDefined();
 
     // Track initial call counts
     const initialRegisterStateCalls = registerStateSpy.mock.calls.length;

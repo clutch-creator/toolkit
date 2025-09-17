@@ -4,20 +4,6 @@ import type { FieldState, FormState, PartialFormState } from './types.js';
 const EMPTY_FIELD_ERRORS: Record<string, string> = {};
 const EMPTY_VALUES: Record<string, unknown> = {};
 
-// Cache for memoized results to ensure same content returns same object reference
-const valuesCache = new Map<
-  string,
-  { fields: Record<string, FieldState>; result: Record<string, unknown> }
->();
-const fieldErrorsCache = new Map<
-  string,
-  { fields: Record<string, FieldState>; result: Record<string, string> }
->();
-const formStateCache = new Map<
-  string,
-  { form: FormState | undefined; result: PartialFormState }
->();
-
 // Define FormsState type locally since it's not exported
 type FormsState = {
   forms: Record<string, FormState>;
@@ -51,7 +37,7 @@ export const selectForm = (state: FormsState, formId: string) =>
   state.forms[formId];
 
 export const selectFormFieldErrors = (state: FormsState, formId: string) => {
-  const form = state.forms[formId];
+  const form = selectForm(state, formId);
 
   if (!form) return EMPTY_FIELD_ERRORS;
 
@@ -62,15 +48,8 @@ export const selectFormFieldErrors = (state: FormsState, formId: string) => {
     return EMPTY_FIELD_ERRORS; // Return the same empty object reference
   }
 
-  // Check cache for memoization
-  const cached = fieldErrorsCache.get(formId);
-
-  if (cached && cached.fields === form.fields) {
-    return cached.result;
-  }
-
-  // Create new result
-  const result = Object.keys(form.fields).reduce<Record<string, string>>(
+  // Create result - Zustand will handle shallow comparison through useShallow
+  return Object.keys(form.fields).reduce<Record<string, string>>(
     (acc, fieldName) => {
       const field = form.fields[fieldName];
 
@@ -82,46 +61,29 @@ export const selectFormFieldErrors = (state: FormsState, formId: string) => {
     },
     {}
   );
-
-  // Cache the result
-  fieldErrorsCache.set(formId, { fields: form.fields, result });
-
-  return result;
 };
 
 export const selectFormState = (
   state: FormsState,
   formId: string
 ): PartialFormState | undefined => {
-  const form = state.forms[formId];
+  const form = selectForm(state, formId);
 
-  // Cache this result based on form reference
-  const cacheKey = `formState-${formId}`;
-  const cached = formStateCache.get(cacheKey);
+  if (!form) return undefined;
 
-  if (cached && cached.form === form) {
-    return cached.result;
-  }
-
-  // Create new result
-  const result: PartialFormState = {
-    isSubmitting: form?.isSubmitting || false,
-    isSubmitted: form?.isSubmitted || false,
-    isValid: form?.isValid || true,
-    isDirty: form?.isDirty || false,
-    isValidating: form?.isValidating || false,
-    error: form?.error,
-    fieldErrors: selectFormFieldErrors(state, formId),
+  // Return result - Zustand will handle shallow comparison through useShallow
+  return {
+    isSubmitting: !!form.isSubmitting,
+    isSubmitted: !!form.isSubmitted,
+    isValid: !!form.isValid,
+    isDirty: !!form.isDirty,
+    isValidating: !!form.isValidating,
+    error: form.error,
   };
-
-  // Cache the result
-  formStateCache.set(cacheKey, { form, result });
-
-  return result;
 };
 
 export const selectFormValues = (state: FormsState, formId: string) => {
-  const form = state.forms[formId];
+  const form = selectForm(state, formId);
 
   if (!form) return EMPTY_VALUES;
 
@@ -132,15 +94,8 @@ export const selectFormValues = (state: FormsState, formId: string) => {
     return EMPTY_VALUES; // Return the same empty object reference
   }
 
-  // Check cache for memoization
-  const cached = valuesCache.get(formId);
-
-  if (cached && cached.fields === form.fields) {
-    return cached.result;
-  }
-
-  // Create new result
-  const result = fieldNames.reduce(
+  // Create result - Zustand will handle shallow comparison through useShallow
+  return fieldNames.reduce(
     (acc, fieldName) => {
       acc[fieldName] = form.fields[fieldName]?.value;
 
@@ -148,15 +103,10 @@ export const selectFormValues = (state: FormsState, formId: string) => {
     },
     {} as Record<string, unknown>
   );
-
-  // Cache the result
-  valuesCache.set(formId, { fields: form.fields, result });
-
-  return result;
 };
 
 export const selectFormErrors = (state: FormsState, formId: string) => {
-  const form = state.forms[formId];
+  const form = selectForm(state, formId);
 
   if (!form) return EMPTY_FIELD_ERRORS;
 
@@ -180,7 +130,7 @@ export const selectField = (
   formId: string,
   fieldName: string
 ) => {
-  const form = state.forms[formId];
+  const form = selectForm(state, formId);
 
   return form?.fields[fieldName];
 };
@@ -190,7 +140,7 @@ export const selectFieldValue = (
   formId: string,
   fieldName: string
 ) => {
-  const form = state.forms[formId];
+  const form = selectForm(state, formId);
 
   return form?.fields[fieldName]?.value;
 };
@@ -200,7 +150,7 @@ export const selectFieldError = (
   formId: string,
   fieldName: string
 ) => {
-  const form = state.forms[formId];
+  const form = selectForm(state, formId);
 
   return form?.fields[fieldName]?.error;
 };
@@ -210,7 +160,7 @@ export const selectFieldState = (
   formId: string,
   fieldName: string
 ) => {
-  const form = state.forms[formId];
+  const form = selectForm(state, formId);
   const field = form?.fields[fieldName];
 
   if (!field) {
@@ -234,16 +184,25 @@ export const selectFieldState = (
   };
 };
 
-// Store action selectors
-export const selectCreateForm = (state: FormsState) => state.createForm;
-export const selectDestroyForm = (state: FormsState) => state.destroyForm;
-export const selectResetForm = (state: FormsState) => state.resetForm;
-export const selectSetFormState = (state: FormsState) => state.setFormState;
-export const selectSubmitForm = (state: FormsState) => state.submitForm;
-export const selectRegisterField = (state: FormsState) => state.registerField;
-export const selectSetFieldValue = (state: FormsState) => state.setFieldValue;
-export const selectSetFieldTouched = (state: FormsState) =>
-  state.setFieldTouched;
-export const selectSetFieldError = (state: FormsState) => state.setFieldError;
-export const selectValidateForm = (state: FormsState) => state.validateForm;
-export const selectValidateField = (state: FormsState) => state.validateField;
+export const shouldFieldValidateOnChange = (
+  state: FormsState,
+  formId: string,
+  fieldName: string
+) => {
+  const form = selectForm(state, formId);
+  const field = form?.fields[fieldName];
+
+  if (!form || !field) return false;
+
+  return (
+    form.mode === 'onChange' ||
+    form.mode === 'all' ||
+    (form.reValidateMode === 'onChange' && field.touched)
+  );
+};
+
+export const shouldFieldTouchOnChange = (state: FormsState, formId: string) => {
+  const form = selectForm(state, formId);
+
+  return form?.mode === 'onTouched' || form?.mode === 'all';
+};

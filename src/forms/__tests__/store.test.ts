@@ -441,47 +441,4 @@ describe('Forms Store', () => {
       expect(state.forms['test-form'].fields.name.dirty).toBe(true);
     });
   });
-
-  describe('Internal Helpers', () => {
-    beforeEach(() => {
-      const store = useFormsStore.getState();
-
-      store.createForm('test-form');
-      store.registerField('test-form', 'name');
-    });
-
-    it('should determine if field should validate on change', () => {
-      const store = useFormsStore.getState();
-
-      // Default mode is onSubmit - should not validate on change
-      expect(store._shouldValidateOnChange('test-form', 'name')).toBe(false);
-
-      // Set mode to onChange
-      store.setFormState('test-form', { mode: 'onChange' });
-      expect(store._shouldValidateOnChange('test-form', 'name')).toBe(true);
-    });
-
-    it('should determine if field should touch on change', () => {
-      const store = useFormsStore.getState();
-
-      // Default mode is onSubmit - should not touch on change
-      expect(store._shouldTouchOnChange('test-form', 'name')).toBe(false);
-
-      // Set mode to onTouched
-      store.setFormState('test-form', { mode: 'onTouched' });
-      expect(store._shouldTouchOnChange('test-form', 'name')).toBe(true);
-    });
-
-    it('should determine if field should be marked dirty', () => {
-      const store = useFormsStore.getState();
-
-      store.registerField('test-form', 'name', { defaultValue: 'John' });
-
-      // Different value should be dirty
-      expect(store._shouldMarkDirty('test-form', 'name', 'Jane')).toBe(true);
-
-      // Same value should not be dirty
-      expect(store._shouldMarkDirty('test-form', 'name', 'John')).toBe(false);
-    });
-  });
 });

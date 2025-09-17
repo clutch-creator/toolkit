@@ -1,5 +1,9 @@
 import { create } from 'zustand';
-import { selectFormValues } from './selectors.js';
+import {
+  selectFormValues,
+  shouldFieldTouchOnChange,
+  shouldFieldValidateOnChange,
+} from './selectors.js';
 import type { FieldState, FormsStore, FormState } from './types.js';
 
 // Module-level debounce timers - no need to be in store state
@@ -24,7 +28,7 @@ const DEFAULT_FORM_STATE: FormState = {
 const getForm = (
   forms: FormsStore['forms'],
   formId: string,
-  initialState: Partial<FormState>
+  initialState?: Partial<FormState>
 ): FormState => {
   const form = forms[formId];
 
@@ -35,7 +39,11 @@ const getForm = (
     };
   }
 
-  return form;
+  return {
+    ...DEFAULT_FORM_STATE,
+    ...form,
+    ...initialState,
+  };
 };
 
 export const useFormsStore = create<FormsStore>((set, get) => ({
@@ -43,17 +51,14 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
 
   // Form management
   createForm: (formId, options = {}) => {
-    const form = get().forms[formId];
     const newForm = getForm(get().forms, formId, options);
 
-    if (form !== newForm) {
-      set(state => ({
-        forms: {
-          ...state.forms,
-          [formId]: newForm,
-        },
-      }));
-    }
+    set(state => ({
+      forms: {
+        ...state.forms,
+        [formId]: newForm,
+      },
+    }));
   },
 
   destroyForm: formId => {
@@ -121,7 +126,7 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
   // Field registration
   registerField: (formId, fieldName, config = {}) => {
     set(state => {
-      const form = getForm(state.forms, formId, {});
+      const form = getForm(state.forms, formId);
 
       const existingField = form.fields[fieldName];
       const defaultValue =
@@ -179,46 +184,15 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
     });
   },
 
-  // Internal helper methods
-  _shouldValidateOnChange: (formId, fieldName) => {
-    const form = get().forms[formId];
-
-    if (!form) return false;
-
-    const field = form.fields[fieldName];
-
-    if (!field) return false;
-
-    return Boolean(
-      form.mode === 'onChange' ||
-        form.mode === 'all' ||
-        (form.reValidateMode === 'onChange' && field.touched)
-    );
-  },
-
-  _shouldTouchOnChange: (formId, _fieldName) => {
-    const form = get().forms[formId];
-
-    if (!form) return false;
-
-    return form.mode === 'onTouched' || form.mode === 'all';
-  },
-
-  _shouldMarkDirty: (formId, fieldName, value) => {
-    const form = get().forms[formId];
-
-    if (!form) return true;
-
-    const field = form.fields[fieldName];
-
-    return value !== field?.defaultValue;
-  },
-
   // Value management - now uses form configuration internally
   setFieldValue: (formId, fieldName, value) => {
-    const shouldValidate = get()._shouldValidateOnChange(formId, fieldName);
-    const shouldTouch = get()._shouldTouchOnChange(formId, fieldName);
-    const shouldDirty = get()._shouldMarkDirty(formId, fieldName, value);
+    const state = get();
+    const shouldValidate = shouldFieldValidateOnChange(
+      state,
+      formId,
+      fieldName
+    );
+    const shouldTouch = shouldFieldTouchOnChange(state, formId);
 
     set(state => {
       const form = state.forms[formId];
@@ -230,7 +204,7 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
       const updatedField = {
         ...field,
         value,
-        dirty: shouldDirty,
+        dirty: value !== field.defaultValue,
         touched: shouldTouch || field.touched,
       };
 
@@ -659,19 +633,17 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
   },
 
   // Form submission
-  submitForm: async (formId, event) => {
+  submitForm: async formId => {
     const form = get().forms[formId];
+
+    console.log('Submitting form:', formId, form);
 
     if (!form) return;
 
-    // Prevent default form submission if event provided
-    if (event) {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
     // Validate form before submitting
     const isValid = await get().validateForm(formId);
+
+    console.log('Form valid:', isValid);
 
     if (!isValid) return;
 
@@ -690,6 +662,8 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
       get().clearErrors(formId);
 
       const result = await form.onSubmit?.(values);
+
+      console.log('Form submit result:', result);
 
       if (result && typeof result === 'object') {
         // Process each action response

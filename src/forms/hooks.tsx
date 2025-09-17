@@ -1,26 +1,24 @@
 'use client';
 
 import { useCallback, useEffect, useMemo, useRef } from 'react';
+import { useShallow } from 'zustand/react/shallow';
 import { useEvent } from '../utils/hooks.js';
 import { useFormId } from './context.js';
 import {
-  selectCreateForm,
-  selectDestroyForm,
   selectField,
+  selectFormFieldErrors,
   selectFormState,
   selectFormValues,
-  selectRegisterField,
-  selectResetForm,
-  selectSetFieldTouched,
-  selectSetFieldValue,
-  selectSubmitForm,
 } from './selectors.js';
 import { useFormsStore } from './store.js';
-import type { PartialFormState, ValidationRule } from './types.js';
+import type { PartialFormState } from './types.js';
 
+/**
+ * Options for configuring a form
+ */
 export interface UseFormOptions {
   id?: string;
-  onSubmit: (values: Record<string, unknown>) => void | Promise<void>;
+  onSubmit: (values: Record<string, unknown>) => unknown | Promise<unknown>;
   defaultValues?: Record<string, unknown>;
   submitOnChange?: boolean;
   debounceTime?: number;
@@ -28,6 +26,10 @@ export interface UseFormOptions {
 
 let formIdCounter = 0;
 
+/**
+ * Generates a unique form ID automatically.
+ * Used when no explicit ID is provided to useForm.
+ */
 function useAutoFormId() {
   return useMemo(() => {
     formIdCounter += 1;
@@ -36,6 +38,10 @@ function useAutoFormId() {
   }, []);
 }
 
+/**
+ * Main form hook that manages form state, submission, and lifecycle.
+ * Handles form initialization, cleanup, and provides submit/reset handlers.
+ */
 export function useForm(options: UseFormOptions) {
   const {
     id,
@@ -47,14 +53,20 @@ export function useForm(options: UseFormOptions) {
   const autoId = useAutoFormId();
   const formId = id || autoId;
 
-  // Use direct store access for actions
-  const createForm = useFormsStore(selectCreateForm);
-  const destroyForm = useFormsStore(selectDestroyForm);
-  const resetForm = useFormsStore(selectResetForm);
-  const submitForm = useFormsStore(selectSubmitForm);
+  // Use direct store access for actions using useShallow for stable references
+  const { createForm, destroyForm, resetForm, submitForm } = useFormsStore(
+    useShallow(state => ({
+      createForm: state.createForm,
+      destroyForm: state.destroyForm,
+      resetForm: state.resetForm,
+      submitForm: state.submitForm,
+    }))
+  );
 
   const stableDefaultValues = useRef(defaultValues);
-  const stableOnSubmit = useEvent(onSubmit as (...args: unknown[]) => unknown);
+  const stableOnSubmit = useEvent(onSubmit) as (
+    values: Record<string, unknown>
+  ) => void | Promise<void>;
 
   // Initialize form
   useEffect(() => {
@@ -80,8 +92,11 @@ export function useForm(options: UseFormOptions) {
   // Handle form submission
   const handleSubmit = useCallback(
     async (event?: React.FormEvent) => {
+      event?.preventDefault();
+      event?.stopPropagation();
+
       // Use the store's centralized submitForm action
-      await submitForm(formId, event);
+      return await submitForm(formId);
     },
     [submitForm, formId]
   );
@@ -98,9 +113,15 @@ export function useForm(options: UseFormOptions) {
   };
 }
 
-export function useFormState(formId: string): PartialFormState {
+/**
+ * Hook to access the current form state.
+ * Returns default state values if the form doesn't exist.
+ */
+export function useFormState(formId?: string): PartialFormState {
+  const contextFormId = useFormId();
+  const validFormId = formId || contextFormId;
   const formState = useFormsStore(
-    useCallback(state => selectFormState(state, formId), [formId])
+    useShallow(state => selectFormState(state, validFormId))
   );
 
   // Return default values if form doesn't exist
@@ -112,15 +133,41 @@ export function useFormState(formId: string): PartialFormState {
       isDirty: false,
       isValidating: false,
       error: undefined,
-      fieldErrors: {},
     };
   }
 
   return formState;
 }
 
+/**
+ * Hook to get field errors for all fields in a form.
+ */
+export function useFormFieldsErrors(formId?: string) {
+  const contextFormId = useFormId();
+  const validFormId = formId || contextFormId;
+  const fieldErrors = useFormsStore(
+    useShallow(state => selectFormFieldErrors(state, validFormId))
+  );
+
+  return fieldErrors;
+}
+
+/**
+ * Hook for managing individual form field state, validation, and event handlers.
+ * Automatically registers the field with the form and provides onChange/onBlur handlers.
+ */
 export function useFormField<T = string>(props: {
   name: string;
+  /**
+   * For checkbox/radio inputs: the concrete option value represented by this field instance.
+   * When provided, `checked` will be derived by comparing the form value with this option.
+   */
+  value?: unknown;
+  /**
+   * When true, the field accepts multiple selections (e.g., a checkbox group with the same name).
+   * The stored value becomes an array and `checked` is computed via inclusion.
+   */
+  multiple?: boolean;
   defaultValue?: T | undefined;
   required?: boolean;
   requiredMessage?: string;
@@ -147,52 +194,35 @@ export function useFormField<T = string>(props: {
 }) {
   const {
     name: fieldName,
+    value: optionValue,
+    multiple = false,
     defaultValue,
-    required,
-    requiredMessage,
-    minLength,
-    minLengthMessage,
-    maxLength,
-    maxLengthMessage,
-    pattern,
-    patternMessage,
-    validate,
+    ...rules
   } = props;
 
   const formId = useFormId();
 
-  // Use direct store access for actions
-  const registerField = useFormsStore(selectRegisterField);
-  const setFieldValue = useFormsStore(selectSetFieldValue);
-  const setFieldTouched = useFormsStore(selectSetFieldTouched);
-
-  // Build validation rules from props
-  const rules: ValidationRule = useMemo(
-    () => ({
-      ...(required !== undefined && { required, requiredMessage }),
-      ...(minLength !== undefined && { minLength, minLengthMessage }),
-      ...(maxLength !== undefined && { maxLength, maxLengthMessage }),
-      ...(pattern && { pattern, patternMessage }),
-      ...(validate && { validate }),
-    }),
-    [
-      required,
-      requiredMessage,
-      minLength,
-      minLengthMessage,
-      maxLength,
-      maxLengthMessage,
-      pattern,
-      patternMessage,
-      validate,
-    ]
+  // Use direct store access for actions using useShallow for stable references
+  const { registerField, setFieldValue, setFieldTouched } = useFormsStore(
+    useShallow(state => ({
+      registerField: state.registerField,
+      setFieldValue: state.setFieldValue,
+      setFieldTouched: state.setFieldTouched,
+    }))
   );
 
   // Auto-register field
   useEffect(() => {
+    // If multiple selection is enabled and no default is provided, default to an empty array.
+    let resolvedDefault = defaultValue as unknown;
+
+    if (resolvedDefault === undefined && multiple) {
+      resolvedDefault = [] as unknown[];
+    }
+
     registerField(formId, fieldName, {
       rules,
-      ...(defaultValue !== undefined && { defaultValue }),
+      ...(resolvedDefault !== undefined && { defaultValue: resolvedDefault }),
     });
 
     return () => {
@@ -206,12 +236,46 @@ export function useFormField<T = string>(props: {
 
   const onChange = useEvent(
     (event: React.ChangeEvent<HTMLInputElement> | unknown) => {
-      const value =
-        event && typeof event === 'object' && 'target' in event
-          ? (event as React.ChangeEvent<HTMLInputElement>).target.value
-          : event;
+      // DOM event path
+      if (event && typeof event === 'object' && 'target' in event) {
+        const target = event as React.ChangeEvent<HTMLInputElement>;
+        const isChecked = !!target.target.checked;
+        const incomingValue = optionValue ?? target.target.value;
 
-      setFieldValue(formId, fieldName, value);
+        if (multiple) {
+          const current = (field?.value as unknown[]) ?? [];
+          let next: unknown[];
+
+          if (isChecked) {
+            // add if not present
+            next = current.some(v => Object.is(v, incomingValue))
+              ? current
+              : [...current, incomingValue];
+          } else {
+            // remove if present
+            next = current.filter(v => !Object.is(v, incomingValue));
+          }
+          setFieldValue(formId, fieldName, next);
+        } else {
+          // Single selection:
+          // - If optionValue provided (radio-like), set to that value when checked, otherwise clear
+          // - If no optionValue (boolean checkbox), set to the checked boolean
+          if (optionValue !== undefined) {
+            setFieldValue(
+              formId,
+              fieldName,
+              isChecked ? incomingValue : undefined
+            );
+          } else {
+            setFieldValue(formId, fieldName, isChecked);
+          }
+        }
+
+        return;
+      }
+
+      // Direct value setting (non-DOM)
+      setFieldValue(formId, fieldName, event);
     }
   );
 
@@ -220,8 +284,26 @@ export function useFormField<T = string>(props: {
     setFieldTouched(formId, fieldName, true);
   });
 
+  // Compute checked flag for checkbox/radio-style usage
+  const checked = useMemo(() => {
+    if (multiple) {
+      const arr = (field?.value as unknown[]) ?? [];
+
+      return (
+        optionValue !== undefined && arr.some(v => Object.is(v, optionValue))
+      );
+    }
+
+    if (optionValue !== undefined) {
+      return field?.value === optionValue;
+    }
+
+    return Boolean(field?.value);
+  }, [field?.value, multiple, optionValue]);
+
   return {
     value: field?.value as T,
+    checked,
     onChange,
     onBlur,
     error: field?.error,
@@ -234,6 +316,9 @@ export function useFormField<T = string>(props: {
   };
 }
 
+/**
+ * Hook to get a specific field's error message.
+ */
 export const useFormFieldError = (fieldName: string) => {
   const formId = useFormId();
   const fieldError = useFormsStore(
@@ -243,6 +328,9 @@ export const useFormFieldError = (fieldName: string) => {
   return fieldError;
 };
 
+/**
+ * Hook to get all form values for a specific form.
+ */
 export const useFormValues = (formId: string) => {
-  return useFormsStore(state => selectFormValues(state, formId));
+  return useFormsStore(useShallow(state => selectFormValues(state, formId)));
 };

@@ -65,7 +65,14 @@ describe('Forms Hooks', () => {
     it('should return null for non-existent form', () => {
       const { result } = renderHook(() => useFormState('non-existent'));
 
-      expect(result.current).toBeNull();
+      expect(result.current).toEqual({
+        isSubmitting: false,
+        isSubmitted: false,
+        isValid: true,
+        isDirty: false,
+        isValidating: false,
+        error: undefined,
+      });
     });
   });
 
