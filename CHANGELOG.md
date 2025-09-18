@@ -1,5 +1,12 @@
 # @clutch-creator/toolkit
 
+## 1.11.0
+
+### Minor Changes
+
+- 232d13e: Added useRegisterStyleSelectors and deprecate warning on clutchElementConfig
+- a2288ca: Added forms state handling
+
 ## 1.10.0
 
 ### Minor Changes
