@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 1.11.1
+
+### Patch Changes
+
+- 3c7ea1d: fix release
+
 ## 1.11.0
 
 ### Minor Changes
