@@ -700,6 +700,7 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
 
         // Set final state
         get().setFormState(formId, {
+          response: result,
           isSubmitting: false,
           isSubmitted: true,
           isSubmitSuccessful: !hasError,
@@ -709,6 +710,7 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
       } else {
         // Handle simple void response
         get().setFormState(formId, {
+          response: result,
           isSubmitting: false,
           isSubmitted: true,
           isSubmitSuccessful: true,
@@ -721,6 +723,7 @@ export const useFormsStore = create<FormsStore>((set, get) => ({
         error instanceof Error ? error.message : 'Submit failed';
 
       get().setFormState(formId, {
+        response: undefined,
         isSubmitting: false,
         isSubmitted: true,
         isSubmitSuccessful: false,

@@ -131,6 +131,7 @@ export function useFormState(formId?: string): PartialFormState {
       isDirty: false,
       isValidating: false,
       error: undefined,
+      response: undefined,
     };
   }
 

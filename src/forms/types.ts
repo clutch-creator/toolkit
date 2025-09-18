@@ -81,6 +81,7 @@ export type FormState = {
   debounceTime?: number;
   successMessage?: string;
   submitError?: string;
+  response?: unknown;
   onSubmit?: (values: Record<string, unknown>) => unknown | Promise<unknown>;
 };
 
@@ -91,6 +92,7 @@ export type PartialFormState = {
   isDirty: boolean;
   isValidating: boolean;
   error: string | undefined;
+  response: unknown;
 };
 
 export type SubmitHandler<T = Record<string, unknown>> = (
