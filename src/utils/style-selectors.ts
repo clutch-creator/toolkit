@@ -21,7 +21,7 @@ export const StyleSelectors = asStyleSelectorsDict({
   BUFFERING: { name: 'buffering', value: '&[data-buffering]' },
   CHECKED: { name: 'checked', value: '&:checked, &[data-checked]' },
   CURRENT: { name: 'current', value: '&[data-current]' },
-  DISABLED: { name: 'disabled', value: '&[disabled], &[data-disabled]' },
+  DISABLED: { name: 'disabled', value: '&:disabled, &[data-disabled]' },
   DRAGGING: { name: 'dragging', value: '&[data-dragging]' },
   EMPTY: { name: 'empty', value: '&:empty, &[data-empty]' },
   ENABLED: { name: 'enabled', value: '&:enabled, &[data-enabled]' },

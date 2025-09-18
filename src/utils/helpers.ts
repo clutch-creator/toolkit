@@ -10,6 +10,9 @@ import { logger } from './logger.js';
  * @param config.icon - Optional icon identifier for the component
  * @param config.styleSelectors - Optional array of style selectors with name-value pairs
  * @returns void - This function only logs debug information
+ *
+ * @deprecated This is deprecated and will be removed in future versions.
+ * Icon is now file convention and style selectors is now a hook.
  */
 export const clutchElementConfig = (
   element: React.FunctionComponent,
