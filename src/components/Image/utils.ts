@@ -14,10 +14,11 @@ const calculateImageInfo = unstable_cache(
     let imageUrl = src;
 
     if (isLocalImage) {
-      imageUrl = process.env.NEXT_PUBLIC_WEBSITE_URL + src.split('?')[0];
+      const cleanSrc = src.split('?')[0] || src;
+
+      imageUrl = process.env.NEXT_PUBLIC_WEBSITE_URL + cleanSrc;
 
       // Try and load from the filesystem
-      const cleanSrc = src.split('?')[0];
       const publicPath = posixPath.join(process.cwd(), 'public', cleanSrc);
 
       try {

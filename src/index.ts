@@ -15,4 +15,5 @@ export {
   useRegisterAction,
   useRegisterSelect,
   useRegisterState,
+  useWarn,
 } from './state/index.js';
