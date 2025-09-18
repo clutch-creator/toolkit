@@ -14,14 +14,6 @@ interface FormProps {
   defaultValues?: Record<string, unknown>;
 }
 
-interface FormProps {
-  children: React.ReactNode;
-  onSubmit: (values: Record<string, unknown>) => void | Promise<void>;
-  submitOnChange?: boolean;
-  debounceTime?: number;
-  defaultValues?: Record<string, unknown>;
-}
-
 // The Form component that's causing the infinite loop issue
 function Form({
   children,
