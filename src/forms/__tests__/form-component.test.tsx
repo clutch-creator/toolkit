@@ -1,4 +1,4 @@
-import { render } from '@testing-library/react';
+import { cleanup, render } from '@testing-library/react';
 import { beforeEach, describe, expect, it, spyOn } from 'bun:test';
 import React from 'react';
 import * as stateHooks from '../../state/hooks.js';
@@ -87,6 +87,8 @@ describe('Form Component Infinite Loop Investigation', () => {
       stateHooks,
       'useRegisterAction'
     ).mockImplementation(() => {});
+
+    cleanup();
   });
 
   it('should render without infinite loops', async () => {
@@ -113,40 +115,12 @@ describe('Form Component Infinite Loop Investigation', () => {
     expect(utils.container.querySelector('form')).not.toBeNull();
     expect(utils.getByRole('button', { name: 'Submit' })).toBeDefined();
 
-    // Track initial call counts
-    const initialRegisterStateCalls = registerStateSpy.mock.calls.length;
-    const initialRegisterActionCalls = registerActionSpy.mock.calls.length;
-    const initialRenderCount = renderCount;
-
     // Wait longer to see if there are continuous re-renders
     await new Promise(resolve => setTimeout(resolve, 500));
 
     const finalRegisterStateCalls = registerStateSpy.mock.calls.length;
     const finalRegisterActionCalls = registerActionSpy.mock.calls.length;
     const finalRenderCount = renderCount;
-
-    // Log for debugging (only for this test)
-    // eslint-disable-next-line no-console
-    console.log(
-      'Initial renders:',
-      initialRenderCount,
-      'Final renders:',
-      finalRenderCount
-    );
-    // eslint-disable-next-line no-console
-    console.log(
-      'Initial registerState calls:',
-      initialRegisterStateCalls,
-      'Final:',
-      finalRegisterStateCalls
-    );
-    // eslint-disable-next-line no-console
-    console.log(
-      'Initial registerAction calls:',
-      initialRegisterActionCalls,
-      'Final:',
-      finalRegisterActionCalls
-    );
 
     // If there's an infinite loop, these numbers will keep growing dramatically
     // Each render should call registerState 8 times (8 states) and registerAction 2 times (2 actions)
@@ -165,23 +139,12 @@ describe('Form Component Infinite Loop Investigation', () => {
     // Track what values are passed to useRegisterState
     registerStateSpy.mockImplementation((name: string, value: unknown) => {
       if (name === 'data' && value !== previousValues) {
-        // eslint-disable-next-line no-console
-        console.log('Data value changed:', previousValues, '->', value);
         previousValues = value;
       }
       if (name === 'response' && value !== previousResponse) {
-        // eslint-disable-next-line no-console
-        console.log('Response value changed:', previousResponse, '->', value);
         previousResponse = value;
       }
       if (name === 'fieldErrors' && value !== previousFieldErrors) {
-        // eslint-disable-next-line no-console
-        console.log(
-          'FieldErrors value changed:',
-          previousFieldErrors,
-          '->',
-          value
-        );
         previousFieldErrors = value;
       }
 
