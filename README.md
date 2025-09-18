@@ -510,6 +510,30 @@ import { Slot } from '@clutch-creator/toolkit/components/Slot';
 8. Push to your branch: `git push origin feature/amazing-feature`
 9. Create a Pull Request
 
+To run toolkit locally in a clutch project, create a symlink of toolkit:
+
+```bash
+bun link
+```
+
+Then on the project dir:
+
+```bash
+bun link @clutch-creator/toolkit
+```
+
+You'll also need to add some configuration to the project next config, make sure the root path is back enough to where it englobes the toolkit location:
+
+```js
+const nextConfig: NextConfig = withClutch({
+  transpilePackages: ['@clutch-creator/toolkit'],
+  turbo: {
+    root: path.join(__dirname, '../../../../..'),
+  },
+  outputFileTracingRoot: path.join(__dirname, '../../../../..'),
+});
+```
+
 ## 🚀 Deployment
 
 This project uses [Changesets](https://github.com/changesets/changesets) for automated versioning and publishing:
