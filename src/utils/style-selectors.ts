@@ -12,12 +12,16 @@ export type TStyleSelector = {
   value: string;
 };
 
-export const StyleSelectors: Record<string, TStyleSelector> = {
+const asStyleSelectorsDict = <K extends PropertyKey>(o: {
+  [P in K]: TStyleSelector;
+}) => o;
+
+export const StyleSelectors = asStyleSelectorsDict({
   AUTOPLAY: { name: 'autoplay', value: '&[data-autoplay]' },
   BUFFERING: { name: 'buffering', value: '&[data-buffering]' },
   CHECKED: { name: 'checked', value: '&:checked, &[data-checked]' },
   CURRENT: { name: 'current', value: '&[data-current]' },
-  DISABLED: { name: 'disabled', value: '&[disabled], &[data-disabled]' },
+  DISABLED: { name: 'disabled', value: '&:disabled, &[data-disabled]' },
   DRAGGING: { name: 'dragging', value: '&[data-dragging]' },
   EMPTY: { name: 'empty', value: '&:empty, &[data-empty]' },
   ENABLED: { name: 'enabled', value: '&:enabled, &[data-enabled]' },
@@ -81,4 +85,4 @@ export const StyleSelectors: Record<string, TStyleSelector> = {
   VALID: { name: 'valid', value: '&:valid, &[data-valid]' },
   VERTICAL: { name: 'vertical', value: '&[data-orientation=vertical]' },
   VISITED: { name: 'visited', value: '&:visited, &[data-visited]' },
-};
+});
