@@ -72,6 +72,7 @@ describe('Forms Hooks', () => {
         isDirty: false,
         isValidating: false,
         error: undefined,
+        response: undefined,
       });
     });
   });
