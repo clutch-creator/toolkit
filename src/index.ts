@@ -10,10 +10,12 @@ export {
   clutchFunctionConfig,
 } from './utils/helpers.js';
 export * from './utils/logger.js';
+export * from './utils/style-selectors.js';
 
 export {
   useRegisterAction,
   useRegisterSelect,
   useRegisterState,
+  useRegisterStyleSelectors,
   useWarn,
 } from './state/index.js';

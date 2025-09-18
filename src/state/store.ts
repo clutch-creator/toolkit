@@ -7,6 +7,7 @@ import {
   TScopeSelection,
   TStore,
   TStoreInstances,
+  TStyleSelector,
 } from './types.js';
 
 const operateInstance = (
@@ -48,6 +49,7 @@ const getInstance = (
 export const useStore = create<TStore>((set, get) => ({
   instances: {},
 
+  scopedStyleSelectors: {},
   styleSelectors: {},
 
   registerAction: (scopeSelection, options) => {
@@ -161,6 +163,16 @@ export const useStore = create<TStore>((set, get) => ({
         delete newInstances[serializedScope]?.[instanceId];
       }
 
+      const selectionId = [
+        ...scopeSelection.scope,
+        scopeSelection.instanceId,
+      ].join('#');
+
+      // eslint-disable-next-line no-param-reassign
+      delete state.styleSelectors[selectionId];
+      // eslint-disable-next-line no-param-reassign
+      delete state.scopedStyleSelectors[selectionId];
+
       return { instances: newInstances };
     });
   },
@@ -213,13 +225,31 @@ export const useStore = create<TStore>((set, get) => ({
   },
 
   updateInstanceStyleSelectors: (
-    selectionId: string,
-    styleSelectors: { name: string; value: string }[]
+    selectionId,
+    styleSelectors,
+    scope = 'default'
   ) => {
     // we dont need to update the store, mutate styleSelectors directly (debugging only)
     const state = get();
 
-    state.styleSelectors[selectionId] = styleSelectors;
+    state.scopedStyleSelectors[selectionId] ??= {};
+
+    if (!styleSelectors.length) {
+      delete state.scopedStyleSelectors[selectionId][scope];
+    } else {
+      state.scopedStyleSelectors[selectionId][scope] = styleSelectors;
+    }
+
+    // create styleSelectors from all scopes
+    const allStyleSelectors: TStyleSelector[] = [];
+
+    Object.values(state.scopedStyleSelectors[selectionId]).forEach(
+      selectors => {
+        allStyleSelectors.push(...selectors);
+      }
+    );
+
+    state.styleSelectors[selectionId] = allStyleSelectors;
   },
 
   setInstanceMessage: (scopeSelection, level, shouldShow, message) => {

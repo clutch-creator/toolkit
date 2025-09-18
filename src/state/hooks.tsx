@@ -334,6 +334,35 @@ export const useEventsInstance = (
   };
 };
 
+let stylesSelectorsCounter = 0;
+
+export const useRegisterStyleSelectors = (styleSelectors: TStyleSelector[]) => {
+  const scopeSelection = useScopeSelection();
+  const selectionId = useMemo(() => {
+    return [...scopeSelection.scope, scopeSelection.instanceId].join('#');
+  }, [scopeSelection]);
+
+  const scope = useMemo(() => {
+    stylesSelectorsCounter += 1;
+
+    return `s${stylesSelectorsCounter}`;
+  }, []);
+
+  const updateInstanceStyleSelectors = useStore(
+    state => state.updateInstanceStyleSelectors
+  );
+
+  useEffect(() => {
+    updateInstanceStyleSelectors(selectionId, styleSelectors, scope);
+  }, [selectionId, styleSelectors, updateInstanceStyleSelectors, scope]);
+
+  useEffect(() => {
+    return () => {
+      updateInstanceStyleSelectors(selectionId, [], scope);
+    };
+  }, [selectionId, updateInstanceStyleSelectors, scope]);
+};
+
 /**
  * Hook to set a warning message for current instance
  *

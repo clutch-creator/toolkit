@@ -63,6 +63,11 @@ export type TStoreInstances = {
 export type TStore = {
   instances: TStoreInstances;
 
+  scopedStyleSelectors: {
+    [selectionId: string]: {
+      [scope: string]: TStyleSelector[];
+    };
+  };
   styleSelectors: {
     [selectionId: string]: TStyleSelector[];
   };
@@ -108,6 +113,7 @@ export type TStore = {
 
   updateInstanceStyleSelectors: (
     selectionId: string,
-    styleSelectors: TStyleSelector[]
+    styleSelectors: TStyleSelector[],
+    scope?: string
   ) => void;
 };
