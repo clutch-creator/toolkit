@@ -100,9 +100,5 @@
   "peerDependencies": {
     "react": "^19.0.0",
     "next": "^15.3.3"
-  },
-  "overrides": {
-    "next": "15.5.0",
-    "sharp": "0.32.6"
   }
 }
