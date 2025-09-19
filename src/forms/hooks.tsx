@@ -216,13 +216,16 @@ export function useFormField<T = string>(props: TUseFormFieldOptions<T>) {
 
   const onChange = useEvent(
     (eventOrValue: React.ChangeEvent<HTMLInputElement> | unknown) => {
-      const isEvent = typeof event === 'object' && 'target' in event;
-      const changeValue = isEvent
-        ? (eventOrValue as React.ChangeEvent<HTMLInputElement>).target.value
-        : eventOrValue;
+      const isEvent =
+        eventOrValue &&
+        typeof eventOrValue === 'object' &&
+        'target' in eventOrValue;
 
       // DOM event path
       if (multiple || optionValue !== undefined) {
+        const changeValue = isEvent
+          ? (eventOrValue as React.ChangeEvent<HTMLInputElement>).target.checked
+          : eventOrValue;
         const isChecked = !!changeValue;
 
         if (multiple) {
@@ -246,6 +249,10 @@ export function useFormField<T = string>(props: TUseFormFieldOptions<T>) {
 
         return;
       }
+
+      const changeValue = isEvent
+        ? (eventOrValue as React.ChangeEvent<HTMLInputElement>).target.value
+        : eventOrValue;
 
       // Direct value setting (non-DOM)
       setFieldValue(formId, fieldName, changeValue);

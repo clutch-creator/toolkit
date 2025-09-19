@@ -125,6 +125,7 @@ describe('useFormField checkbox/radio support', () => {
     fireEvent.click(getByTestId('red'));
     expect((getByTestId('red') as HTMLInputElement).checked).toBe(true);
     expect(getByTestId('value-checkbox').textContent).toBe('["red"]');
+
     // Check blue
     fireEvent.click(getByTestId('blue'));
     expect((getByTestId('blue') as HTMLInputElement).checked).toBe(true);
