@@ -1,5 +1,18 @@
 # @clutch-creator/toolkit
 
+## 1.12.0
+
+### Minor Changes
+
+- 7dddc15: Added hooks:
+
+  useFormFieldError
+  useFormFieldIsValidating
+  useFormFieldIsValid
+  useFormFieldIsDirty
+
+  useForm now accepts min and max options
+
 ## 1.11.1
 
 ### Patch Changes
