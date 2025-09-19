@@ -80,6 +80,7 @@ export const selectFormState = (
     isValidating: !!form.isValidating,
     error: form.error,
     response: form.response,
+    successMessage: form.successMessage,
   };
 };
 
@@ -161,8 +162,7 @@ export const selectFieldState = (
   formId: string,
   fieldName: string
 ) => {
-  const form = selectForm(state, formId);
-  const field = form?.fields[fieldName];
+  const field = selectField(state, formId, fieldName);
 
   if (!field) {
     return {

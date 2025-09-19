@@ -93,6 +93,7 @@ export type PartialFormState = {
   isValidating: boolean;
   error: string | undefined;
   response: unknown;
+  successMessage: string | undefined;
 };
 
 export type SubmitHandler<T = Record<string, unknown>> = (
