@@ -11,7 +11,7 @@ import {
   selectFormValues,
 } from './selectors.js';
 import { useFormsStore } from './store.js';
-import type { PartialFormState } from './types.js';
+import type { PartialFormState, ValidationRule } from './types.js';
 
 /**
  * Options for configuring a form
@@ -132,6 +132,7 @@ export function useFormState(formId?: string): PartialFormState {
       isValidating: false,
       error: undefined,
       response: undefined,
+      successMessage: undefined,
     };
   }
 
@@ -151,11 +152,7 @@ export function useFormFieldsErrors(formId?: string) {
   return fieldErrors;
 }
 
-/**
- * Hook for managing individual form field state, validation, and event handlers.
- * Automatically registers the field with the form and provides onChange/onBlur handlers.
- */
-export function useFormField<T = string>(props: {
+type TUseFormFieldOptions<T = string> = {
   name: string;
   /**
    * For checkbox/radio inputs: the concrete option value represented by this field instance.
@@ -168,29 +165,13 @@ export function useFormField<T = string>(props: {
    */
   multiple?: boolean;
   defaultValue?: T | undefined;
-  required?: boolean;
-  requiredMessage?: string;
-  minLength?: number;
-  minLengthMessage?: string;
-  maxLength?: number;
-  maxLengthMessage?: string;
-  pattern?: RegExp;
-  patternMessage?: string;
-  validate?:
-    | ((
-        value: unknown
-      ) => string | boolean | undefined | Promise<string | boolean | undefined>)
-    | Record<
-        string,
-        (
-          value: unknown
-        ) =>
-          | string
-          | boolean
-          | undefined
-          | Promise<string | boolean | undefined>
-      >;
-}) {
+} & ValidationRule;
+
+/**
+ * Hook for managing individual form field state, validation, and event handlers.
+ * Automatically registers the field with the form and provides onChange/onBlur handlers.
+ */
+export function useFormField<T = string>(props: TUseFormFieldOptions<T>) {
   const {
     name: fieldName,
     value: optionValue,
@@ -234,12 +215,18 @@ export function useFormField<T = string>(props: {
   const field = useFormsStore(state => selectField(state, formId, fieldName));
 
   const onChange = useEvent(
-    (event: React.ChangeEvent<HTMLInputElement> | unknown) => {
+    (eventOrValue: React.ChangeEvent<HTMLInputElement> | unknown) => {
+      const isEvent =
+        eventOrValue &&
+        typeof eventOrValue === 'object' &&
+        'target' in eventOrValue;
+
       // DOM event path
-      if (event && typeof event === 'object' && 'target' in event) {
-        const target = event as React.ChangeEvent<HTMLInputElement>;
-        const isChecked = !!target.target.checked;
-        const incomingValue = optionValue ?? target.target.value;
+      if (multiple || optionValue !== undefined) {
+        const changeValue = isEvent
+          ? (eventOrValue as React.ChangeEvent<HTMLInputElement>).target.checked
+          : eventOrValue;
+        const isChecked = !!changeValue;
 
         if (multiple) {
           const current = (field?.value as unknown[]) ?? [];
@@ -247,34 +234,28 @@ export function useFormField<T = string>(props: {
 
           if (isChecked) {
             // add if not present
-            next = current.some(v => Object.is(v, incomingValue))
+            next = current.some(v => Object.is(v, optionValue))
               ? current
-              : [...current, incomingValue];
+              : [...current, optionValue];
           } else {
             // remove if present
-            next = current.filter(v => !Object.is(v, incomingValue));
+            next = current.filter(v => !Object.is(v, optionValue));
           }
           setFieldValue(formId, fieldName, next);
         } else {
-          // Single selection:
-          // - If optionValue provided (radio-like), set to that value when checked, otherwise clear
-          // - If no optionValue (boolean checkbox), set to the checked boolean
-          if (optionValue !== undefined) {
-            setFieldValue(
-              formId,
-              fieldName,
-              isChecked ? incomingValue : undefined
-            );
-          } else {
-            setFieldValue(formId, fieldName, isChecked);
-          }
+          // Single selection
+          setFieldValue(formId, fieldName, isChecked ? optionValue : undefined);
         }
 
         return;
       }
 
+      const changeValue = isEvent
+        ? (eventOrValue as React.ChangeEvent<HTMLInputElement>).target.value
+        : eventOrValue;
+
       // Direct value setting (non-DOM)
-      setFieldValue(formId, fieldName, event);
+      setFieldValue(formId, fieldName, changeValue);
     }
   );
 
@@ -325,6 +306,42 @@ export const useFormFieldError = (fieldName: string) => {
   );
 
   return fieldError;
+};
+
+/**
+ * Hook to get a specific field's validating status.
+ */
+export const useFormFieldIsValidating = (fieldName: string) => {
+  const formId = useFormId();
+  const fieldValidating = useFormsStore(
+    state => selectField(state, formId, fieldName)?.isValidating
+  );
+
+  return fieldValidating;
+};
+
+/**
+ * Hook to get a specific field's validating status.
+ */
+export const useFormFieldIsValid = (fieldName: string) => {
+  const formId = useFormId();
+  const fieldValid = useFormsStore(
+    state => selectField(state, formId, fieldName)?.isValid
+  );
+
+  return fieldValid;
+};
+
+/**
+ * Hook to get a specific field's validating status.
+ */
+export const useFormFieldIsDirty = (fieldName: string) => {
+  const formId = useFormId();
+  const fieldDirty = useFormsStore(
+    state => selectField(state, formId, fieldName)?.dirty
+  );
+
+  return fieldDirty;
 };
 
 /**
