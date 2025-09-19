@@ -73,6 +73,7 @@ describe('Forms Hooks', () => {
         isValidating: false,
         error: undefined,
         response: undefined,
+        successMessage: undefined,
       });
     });
   });
