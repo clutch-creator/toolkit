@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.0.0
+
+### Major Changes
+
+- 97b6691: Drop forms feature
+
 ## 1.12.0
 
 ### Minor Changes
