@@ -26,10 +26,6 @@
       "types": "./src/state/index.ts",
       "default": "./dist/state/index.js"
     },
-    "./forms": {
-      "types": "./src/forms/index.ts",
-      "default": "./dist/forms/index.js"
-    },
     "./sitemap": {
       "types": "./src/sitemap/index.ts",
       "default": "./dist/sitemap/index.js"
