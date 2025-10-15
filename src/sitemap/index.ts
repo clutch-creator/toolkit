@@ -37,7 +37,10 @@ export function parseSitemap(
     // object to replace segments
     if (typeof item.url === 'object') {
       segments.forEach(paramName => {
-        let paramValue = item.url?.[paramName] ?? paramName;
+        let paramValue =
+          typeof item.url === 'object' && item.url !== null
+            ? (item.url[paramName] ?? paramName)
+            : paramName;
 
         // Arrays are only allowed for catch-all segments
         if (Array.isArray(paramValue)) {
