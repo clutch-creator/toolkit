@@ -1,5 +1,15 @@
 # @clutch-creator/toolkit
 
+## 2.0.0
+
+### Major Changes
+
+- 97b6691: Drop forms feature
+
+### Patch Changes
+
+- 2a7b9c2: Fix sitemap parsing when no dynamic path involved
+
 ## 1.12.0
 
 ### Minor Changes
