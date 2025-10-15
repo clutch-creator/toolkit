@@ -25,34 +25,34 @@ export function parseSitemap(
 ): MetadataRoute.Sitemap {
   const segments = pagePath ? parsePathSegments(pagePath) : [];
 
-  if (!segments?.length) {
-    return [];
-  }
-
   return sitemap.reduce<MetadataRoute.Sitemap>((acc, item) => {
     let resultUrl = pagePath || '';
 
-    if (!item.url || typeof item.url !== 'object' || Array.isArray(item.url)) {
-      return acc;
+    if (!item.url) return acc;
+
+    if (typeof item.url === 'string') {
+      resultUrl = item.url;
     }
 
     // object to replace segments
-    segments.forEach(paramName => {
-      let paramValue = item.url?.[paramName] ?? paramName;
+    if (typeof item.url === 'object') {
+      segments.forEach(paramName => {
+        let paramValue = item.url?.[paramName] ?? paramName;
 
-      // Arrays are only allowed for catch-all segments
-      if (Array.isArray(paramValue)) {
-        paramValue =
-          paramName.startsWith('...') && paramValue.length > 0
-            ? paramValue.join('/')
-            : '';
-      }
+        // Arrays are only allowed for catch-all segments
+        if (Array.isArray(paramValue)) {
+          paramValue =
+            paramName.startsWith('...') && paramValue.length > 0
+              ? paramValue.join('/')
+              : '';
+        }
 
-      resultUrl = resultUrl
-        .replace(`[[${paramName}]]`, paramValue)
-        .replace(`[${paramName}]`, paramValue)
-        .replace('//', '/');
-    });
+        resultUrl = resultUrl
+          .replace(`[[${paramName}]]`, paramValue)
+          .replace(`[${paramName}]`, paramValue)
+          .replace('//', '/');
+      });
+    }
 
     if (resultUrl.startsWith('/')) {
       resultUrl = `${process.env.NEXT_PUBLIC_WEBSITE_URL}${resultUrl}`;
