@@ -58,7 +58,9 @@ export function parseSitemap(
     }
 
     if (resultUrl.startsWith('/')) {
-      resultUrl = `${process.env.NEXT_PUBLIC_WEBSITE_URL}${resultUrl}`;
+      const basePath = process.env.__NEXT_ROUTER_BASEPATH || '';
+
+      resultUrl = `${process.env.NEXT_PUBLIC_WEBSITE_URL}${basePath}${resultUrl}`;
     }
 
     acc.push({
