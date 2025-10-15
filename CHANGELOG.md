@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.0.1
+
+### Patch Changes
+
+- a52b328: Add basePath to URLs in sitemaps
+
 ## 2.0.0
 
 ### Major Changes
