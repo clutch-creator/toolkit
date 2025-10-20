@@ -7,7 +7,7 @@
         "@modelcontextprotocol/sdk": "^1.20.0",
         "@swc/helpers": "^0.5.17",
         "ai": "^5.0.68",
-        "mcp-oauth-provider": "^0.0.4",
+        "mcp-oauth-provider": "^1.0.0",
         "plaiceholder": "^3.0.0",
         "qs-esm": "^7.0.2",
         "schema-dts": "^1.1.5",
@@ -821,7 +821,7 @@
 
     "math-intrinsics": ["math-intrinsics@1.1.0", "", {}, "sha512-/IXtbwEk5HTPyEwyKX6hGkYXxM9nbj64B+ilVJnC/R6B0pH5G4V3b0pVbL7DBj4tkhBAppbQUlf6F6Xl9LHu1g=="],
 
-    "mcp-oauth-provider": ["mcp-oauth-provider@0.0.4", "", { "dependencies": { "@modelcontextprotocol/sdk": "^1.20.1", "@swc/helpers": "^0.5.17" } }, "sha512-43+cc/E917oJo3820AhkwWlp3j03Mlem4j0LGLCYsRSjsAWV3mGXALOrzthuS0+HG1gdZh/f50R8sw+0UQYpDQ=="],
+    "mcp-oauth-provider": ["mcp-oauth-provider@1.0.0", "", { "dependencies": { "@modelcontextprotocol/sdk": "^1.20.1", "@swc/helpers": "^0.5.17" } }, "sha512-y1o/j3pOSvLa3W/pwPru5Doq9S3Xhco3ceaOswFS6WnbVjliqVcJRcMBDBI5cUVZkCiQaGguMsSR2NrxV1NVdQ=="],
 
     "mdn-data": ["mdn-data@2.12.2", "", {}, "sha512-IEn+pegP1aManZuckezWCO+XZQDplx1366JoVhTpMpBB1sPey/SbveZQUosKiKiGYjg1wH4pMlNgXbCiYgihQA=="],
 

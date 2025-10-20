@@ -1,6 +1,17 @@
+import type { LanguageModel, ToolSet, UIMessage } from 'ai';
 import { convertToModelMessages, stepCountIs, streamText } from 'ai';
 
-export async function streamUIResponse({ model, system, messages, tools }) {
+export async function streamUIResponse({
+  model,
+  system,
+  messages,
+  tools,
+}: {
+  model: LanguageModel;
+  system: string;
+  messages: UIMessage[];
+  tools?: ToolSet;
+}) {
   const result = streamText({
     model,
     system,
