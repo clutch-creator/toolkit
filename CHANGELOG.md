@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.1.0
+
+### Minor Changes
+
+- 42061b8: Added ai utilities for agents in clutch
+
 ## 2.0.1
 
 ### Patch Changes
