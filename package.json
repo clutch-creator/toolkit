@@ -71,6 +71,7 @@
     "@swc/helpers": "^0.5.17",
     "@modelcontextprotocol/sdk": "^1.20.0",
     "ai": "^5.0.68",
+    "mcp-oauth-provider": "^0.0.5",
     "zustand": "^5.0.3",
     "qs-esm": "^7.0.2",
     "plaiceholder": "^3.0.0",
