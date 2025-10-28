@@ -1,5 +1,5 @@
+import { experimental_createMCPClient as sdkCreateMCPClient } from '@ai-sdk/mcp';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
-import { experimental_createMCPClient as createMCPClient } from 'ai';
 import { createOAuthProvider } from 'mcp-oauth-provider';
 
 export enum AuthMethod {
@@ -81,7 +81,7 @@ export const createMcpClient = async ({
     };
   }
 
-  return await createMCPClient({
+  return await sdkCreateMCPClient({
     transport: new StreamableHTTPClientTransport(urlObj, transportOptions),
   });
 };
