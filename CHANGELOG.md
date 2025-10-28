@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.2.1
+
+### Patch Changes
+
+- 58977a0: Update dependencies fixing latest ai package
+
 ## 2.2.0
 
 ### Minor Changes
