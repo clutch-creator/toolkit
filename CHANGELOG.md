@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.2.0
+
+### Minor Changes
+
+- 987a9ed: Ai generate object function
+
 ## 2.1.0
 
 ### Minor Changes
