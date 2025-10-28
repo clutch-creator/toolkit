@@ -36,7 +36,7 @@ export async function generateObject<T extends z.ZodType>({
   system,
   tools,
   schema,
-  prompt,
+  prompt = 'Call the output tool to return the structured data as per the tool schema.',
 }: {
   model: LanguageModel;
   system: string;
