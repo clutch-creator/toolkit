@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.2.2
+
+### Patch Changes
+
+- 9cbb0c4: Include jsonSchema in the ai exports
+
 ## 2.2.1
 
 ### Patch Changes
