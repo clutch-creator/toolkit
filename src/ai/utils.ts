@@ -1,6 +1,8 @@
 import { tool as createTool, Tool } from 'ai';
 import { z } from 'zod';
 
+export { jsonSchema } from 'ai';
+
 type TComponentsSchema = Record<
   string,
   {
