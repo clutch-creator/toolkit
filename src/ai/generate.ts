@@ -55,7 +55,7 @@ CRITICAL INSTRUCTION: You MUST call the 'final_output' tool at the end of your r
 DO NOT generate any text output. ONLY use tool calls. Do not explain, describe, or write anything. Just call the necessary tools.`,
     tools: {
       ...tools,
-      output: tool({
+      final_output: tool({
         description:
           'REQUIRED: Call this tool to return the final structured output. You MUST call this tool.',
         inputSchema: schema,
