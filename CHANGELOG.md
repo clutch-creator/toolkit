@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.2.4
+
+### Patch Changes
+
+- dd3560c: Fix generate object final output name
+
 ## 2.2.3
 
 ### Patch Changes
