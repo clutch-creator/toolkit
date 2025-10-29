@@ -36,7 +36,7 @@ export async function generateObject<T extends z.ZodType>({
   system,
   tools,
   schema,
-  prompt = 'Call the output tool to return the structured data as per the tool schema.',
+  prompt = 'Call the final_output tool to return the structured data as per the tool schema.',
 }: {
   model: LanguageModel;
   system: string;
@@ -47,9 +47,10 @@ export async function generateObject<T extends z.ZodType>({
   const result = await generateText({
     model,
     prompt,
+    stopWhen: stepCountIs(10),
     system: `${system}
 
-CRITICAL INSTRUCTION: You MUST call the 'output' tool at the end of your response. This is mandatory and non-negotiable. Always end by calling the 'output' tool with the structured data requested.
+CRITICAL INSTRUCTION: You MUST call the 'final_output' tool at the end of your response. This is mandatory and non-negotiable. Always end by calling the 'final_output' tool with the structured data requested.
 
 DO NOT generate any text output. ONLY use tool calls. Do not explain, describe, or write anything. Just call the necessary tools.`,
     tools: {
@@ -64,13 +65,14 @@ DO NOT generate any text output. ONLY use tool calls. Do not explain, describe, 
     toolChoice: 'required',
   });
 
-  const outputToolCall = result.toolResults.find(
-    call => call.toolName === 'output'
+  const allToolCalls = result.steps.flatMap(step => step.toolCalls);
+  const outputToolCall = allToolCalls.find(
+    call => call.toolName === 'final_output'
   );
 
   if (!outputToolCall) {
     throw new Error('No output tool call found');
   }
 
-  return outputToolCall.output as z.infer<T>;
+  return outputToolCall.input;
 }
