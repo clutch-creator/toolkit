@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.2.3
+
+### Patch Changes
+
+- 2bca974: Fix generate object with better output enforcement
+
 ## 2.2.2
 
 ### Patch Changes
