@@ -47,12 +47,10 @@ export async function generateObject<T extends z.ZodType>({
   const result = await generateText({
     model,
     prompt,
-    stopWhen: stepCountIs(10),
+    stopWhen: stepCountIs(15),
     system: `${system}
 
-CRITICAL INSTRUCTION: You MUST call the 'final_output' tool at the end of your response. This is mandatory and non-negotiable. Always end by calling the 'final_output' tool with the structured data requested.
-
-DO NOT generate any text output. ONLY use tool calls. Do not explain, describe, or write anything. Just call the necessary tools.`,
+CRITICAL INSTRUCTION: You must call the 'final_output' tool exactly once with the requested data. Only use tools, no text responses.`,
     tools: {
       ...tools,
       final_output: tool({
@@ -62,7 +60,6 @@ DO NOT generate any text output. ONLY use tool calls. Do not explain, describe, 
         execute: async args => args,
       }),
     },
-    toolChoice: 'required',
   });
 
   const allToolCalls = result.steps.flatMap(step => step.toolCalls);
