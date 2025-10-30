@@ -1,11 +1,5 @@
 import type { LanguageModel, ToolSet, UIMessage } from 'ai';
-import {
-  convertToModelMessages,
-  generateText,
-  stepCountIs,
-  streamText,
-  tool,
-} from 'ai';
+import { convertToModelMessages, generateText, streamText, tool } from 'ai';
 import { z } from 'zod';
 
 export async function streamUIResponse({
@@ -23,8 +17,6 @@ export async function streamUIResponse({
     model,
     system,
     messages: convertToModelMessages(messages),
-    stopWhen: stepCountIs(15),
-    maxOutputTokens: 2000,
     tools,
   });
 
@@ -47,7 +39,6 @@ export async function generateObject<T extends z.ZodType>({
   const result = await generateText({
     model,
     prompt,
-    stopWhen: stepCountIs(15),
     system: `${system}
 
 CRITICAL INSTRUCTION: You must call the 'final_output' tool exactly once with the requested data. Only use tools, no text responses.`,
