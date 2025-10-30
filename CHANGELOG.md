@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.2.5
+
+### Patch Changes
+
+- 7857829: Generate object improve reliability
+
 ## 2.2.4
 
 ### Patch Changes
