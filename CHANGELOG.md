@@ -1,5 +1,12 @@
 # @clutch-creator/toolkit
 
+## 2.2.7
+
+### Patch Changes
+
+- a0b94a5: Generate object only stop when final output tool has been called
+- a0b94a5: Stop stream ui with max steps and early return
+
 ## 2.2.6
 
 ### Patch Changes
