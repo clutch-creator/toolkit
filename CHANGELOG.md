@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.2.6
+
+### Patch Changes
+
+- 9364620: Remove stop condition with number of tool calls
+
 ## 2.2.5
 
 ### Patch Changes
