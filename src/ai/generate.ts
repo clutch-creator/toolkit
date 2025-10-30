@@ -1,5 +1,12 @@
 import type { LanguageModel, ToolSet, UIMessage } from 'ai';
-import { convertToModelMessages, generateText, streamText, tool } from 'ai';
+import {
+  convertToModelMessages,
+  generateText,
+  hasToolCall,
+  stepCountIs,
+  streamText,
+  tool,
+} from 'ai';
 import { z } from 'zod';
 
 export async function streamUIResponse({
@@ -7,17 +14,27 @@ export async function streamUIResponse({
   system,
   messages,
   tools,
+  maxSteps = 20,
 }: {
   model: LanguageModel;
   system: string;
   messages: UIMessage[];
   tools?: ToolSet;
+  maxSteps?: number;
 }) {
   const result = streamText({
     model,
     system,
     messages: convertToModelMessages(messages),
-    tools,
+    tools: {
+      ...tools,
+      internal_answered: tool({
+        description: 'Internal tool to mark that the AI has answered the user.',
+        inputSchema: z.object({}),
+        execute: async () => null,
+      }),
+    },
+    stopWhen: [stepCountIs(maxSteps), hasToolCall('internal_answered')],
   });
 
   return result.toUIMessageStreamResponse();
@@ -51,6 +68,7 @@ CRITICAL INSTRUCTION: You must call the 'final_output' tool exactly once with th
         execute: async args => args,
       }),
     },
+    stopWhen: hasToolCall('final_output'),
   });
 
   const allToolCalls = result.steps.flatMap(step => step.toolCalls);
