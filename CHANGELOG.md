@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 2.2.8
+
+### Patch Changes
+
+- 6a43135: Change default sizes prop to 'auto' in Image primitive
+
 ## 2.2.7
 
 ### Patch Changes
