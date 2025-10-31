@@ -35,7 +35,7 @@ export const ClientImage = ({ children, ...props }: TClientImageProps) => {
       width={0}
       height={0}
       {...props}
-      sizes={props.sizes || '100vw'}
+      sizes={props.sizes || 'auto'}
       placeholder={placeholderVal}
     />
   );

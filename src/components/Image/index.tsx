@@ -20,7 +20,7 @@ export async function Image({
   src,
   className,
   placeholder,
-  sizes = '100vw',
+  sizes = 'auto',
   ...props
 }: TClutchImageProps) {
   if (!src) return null;
