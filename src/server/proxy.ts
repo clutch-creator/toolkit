@@ -23,6 +23,7 @@ export async function proxyPipe(
     if (proxyResp) {
       if (
         REDIRECT_TAGS.includes(proxyResp.status) ||
+        proxyResp.headers.get('x-middleware-rewrite') ||
         proxyResp.headers.get('x-proxy-rewrite')
       ) {
         return proxyResp;
