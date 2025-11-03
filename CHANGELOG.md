@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 3.0.0
+
+### Major Changes
+
+- 24045d5: Upgrade to next 16
+
 ## 2.2.8
 
 ### Patch Changes
