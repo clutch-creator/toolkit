@@ -117,7 +117,7 @@ export function Seo({ seoData }: TSeoProps) {
       {seoData?.favicon && <link rel='icon' href={seoData.favicon} />}
       {seoData?.schema && (
         <script
-          type='application/ld+seoData'
+          type='application/ld+json'
           dangerouslySetInnerHTML={{ __html: JSON.stringify(seoData.schema) }}
         />
       )}
