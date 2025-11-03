@@ -5,6 +5,6 @@ export function revalidateAll() {
 }
 
 export function revalidateCache(tags: string[], paths: string[]): void {
-  tags?.forEach(tag => revalidateTag(tag));
+  tags?.forEach(tag => revalidateTag(tag, 'max'));
   paths?.forEach(path => revalidatePath(path));
 }
