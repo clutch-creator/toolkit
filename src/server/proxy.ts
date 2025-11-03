@@ -1,7 +1,7 @@
 import type { NextFetchEvent, NextRequest } from 'next/server';
 import { NextResponse } from 'next/server';
 
-type TMiddleware = (
+type TProxy = (
   request: NextRequest,
   response: NextResponse,
   event: NextFetchEvent
@@ -9,26 +9,26 @@ type TMiddleware = (
 
 const REDIRECT_TAGS = [301, 302, 303, 307, 308];
 
-export async function middlewarePipe(
-  pluginsMiddlewares: TMiddleware[],
+export async function proxyPipe(
+  pluginsProxies: TProxy[],
   request: NextRequest,
   event: NextFetchEvent
 ) {
   let response = NextResponse.next();
 
-  for (const plugin of pluginsMiddlewares) {
+  for (const plugin of pluginsProxies) {
     // eslint-disable-next-line no-await-in-loop
-    const middlewareResp = await plugin(request, response, event);
+    const proxyResp = await plugin(request, response, event);
 
-    if (middlewareResp) {
+    if (proxyResp) {
       if (
-        REDIRECT_TAGS.includes(middlewareResp.status) ||
-        middlewareResp.headers.get('x-middleware-rewrite')
+        REDIRECT_TAGS.includes(proxyResp.status) ||
+        proxyResp.headers.get('x-proxy-rewrite')
       ) {
-        return middlewareResp;
+        return proxyResp;
       }
 
-      response = middlewareResp;
+      response = proxyResp;
     }
   }
 
