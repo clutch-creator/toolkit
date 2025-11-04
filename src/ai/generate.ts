@@ -1,7 +1,7 @@
 import type { LanguageModel, ToolSet, UIMessage } from 'ai';
 import {
+  generateText as aiGenerateText,
   convertToModelMessages,
-  generateText,
   hasToolCall,
   stepCountIs,
   streamText,
@@ -9,6 +9,10 @@ import {
 } from 'ai';
 import { z } from 'zod';
 
+/**
+ * Streams a UI response using the AI model with the provided messages and tools.
+ * Automatically stops when max steps is reached or when the internal_answered tool is called.
+ */
 export async function streamUIResponse({
   model,
   system,
@@ -40,6 +44,10 @@ export async function streamUIResponse({
   return result.toUIMessageStreamResponse();
 }
 
+/**
+ * Generates a structured object that conforms to the provided Zod schema.
+ * Forces the model to call the final_output tool to return properly typed data.
+ */
 export async function generateObject<T extends z.ZodType>({
   model,
   system,
@@ -53,7 +61,7 @@ export async function generateObject<T extends z.ZodType>({
   schema: T;
   prompt: string;
 }): Promise<z.infer<T>> {
-  const result = await generateText({
+  const result = await aiGenerateText({
     model,
     prompt,
     system: `${system}
@@ -81,4 +89,48 @@ CRITICAL INSTRUCTION: You must call the 'final_output' tool exactly once with th
   }
 
   return outputToolCall.input;
+}
+
+/**
+ * Generates a text response using the AI model with optional tools.
+ * Returns the generated text as a string.
+ */
+export async function generateText({
+  model,
+  prompt,
+  system,
+  tools,
+  maxSteps = 20,
+}: {
+  model: LanguageModel;
+  prompt: string;
+  system: string;
+  tools?: ToolSet;
+  maxSteps?: number;
+}): Promise<string> {
+  const result = await aiGenerateText({
+    model,
+    prompt,
+    system,
+    tools: tools
+      ? {
+          ...tools,
+          internal_answered: tool({
+            description:
+              'Internal tool to mark that the AI has answered the user.',
+            inputSchema: z.object({}),
+            execute: async () => null,
+          }),
+        }
+      : undefined,
+    stopWhen: tools
+      ? [stepCountIs(maxSteps), hasToolCall('internal_answered')]
+      : undefined,
+  });
+
+  if (tools) {
+    return result.steps.map(step => step.text).join('\n');
+  }
+
+  return result.text;
 }
