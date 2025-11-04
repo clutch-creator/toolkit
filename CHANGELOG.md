@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 3.1.0
+
+### Minor Changes
+
+- 659a34e: Ai generate text helper
+
 ## 3.0.0
 
 ### Major Changes
