@@ -16,17 +16,28 @@ type TClutchImageProps = {
 
 type PlaceholderValue = 'blur' | 'empty' | `data:image/${string}`;
 
-export async function Image({
+export function Image(props: TClutchImageProps) {
+  const { src } = props;
+
+  if (!src) return null;
+
+  // If not in browser (server-side), use ServerImage
+  if (typeof window === 'undefined') {
+    return <ServerImage {...props} />;
+  }
+
+  return <ClientImage {...props} />;
+}
+
+async function ServerImage({
   src,
   className,
   placeholder,
   sizes = 'auto',
   ...props
 }: TClutchImageProps) {
-  if (!src) return null;
-
-  const { width, height, format, blurDataURL } =
-    typeof src === 'string' ? await getImageInfo(src) : src;
+  const imageInfo = typeof src === 'string' ? await getImageInfo(src) : src;
+  const { width, height, format, blurDataURL } = imageInfo;
 
   let placeholderVal: PlaceholderValue = placeholder ? 'blur' : 'empty';
   const size = width + height;
@@ -45,6 +56,23 @@ export async function Image({
       placeholder={placeholderVal}
       blurDataURL={blurDataURL}
       {...props}
+    />
+  );
+}
+
+function ClientImage({
+  src,
+  className,
+  sizes = 'auto',
+  ...props
+}: TClutchImageProps) {
+  return (
+    <NextImage
+      src={src}
+      className={className}
+      sizes={sizes}
+      {...props}
+      placeholder='empty'
     />
   );
 }
