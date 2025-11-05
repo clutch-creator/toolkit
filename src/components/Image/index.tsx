@@ -64,15 +64,12 @@ function ClientImage({
   src,
   className,
   sizes = 'auto',
+  placeholder,
   ...props
 }: TClutchImageProps) {
-  return (
-    <NextImage
-      src={src}
-      className={className}
-      sizes={sizes}
-      {...props}
-      placeholder='empty'
-    />
-  );
+  if (typeof src === 'string') {
+    return <img src={src} className={className} sizes={sizes} {...props} />;
+  }
+
+  return <NextImage src={src} className={className} sizes={sizes} {...props} />;
 }
