@@ -1,8 +1,8 @@
-import NextImage from 'next/image';
+import NextImage, { StaticImageData } from 'next/image';
 import { getImageInfo } from './utils';
 
 type TClutchImageProps = {
-  src: string;
+  src: string | StaticImageData;
   alt: string;
   fill?: boolean;
   sizes?: string;
@@ -16,22 +16,37 @@ type TClutchImageProps = {
 
 type PlaceholderValue = 'blur' | 'empty' | `data:image/${string}`;
 
-export async function Image({
+export function Image(props: TClutchImageProps) {
+  const { src } = props;
+
+  if (!src) return null;
+
+  // If not in browser (server-side), use ServerImage
+  if (typeof window === 'undefined') {
+    return <ServerImage {...props} />;
+  }
+
+  return <ClientImage {...props} />;
+}
+
+async function ServerImage({
   src,
   className,
   placeholder,
   sizes = 'auto',
   ...props
 }: TClutchImageProps) {
-  if (!src) return null;
-
-  const { width, height, format, blurDataURL } =
-    typeof src === 'string' ? await getImageInfo(src) : src;
+  const imageInfo = typeof src === 'string' ? await getImageInfo(src) : src;
+  const { width, height, blurDataURL } = imageInfo;
 
   let placeholderVal: PlaceholderValue = placeholder ? 'blur' : 'empty';
+  const isSvg =
+    'format' in imageInfo
+      ? imageInfo.format === 'svg'
+      : imageInfo.src.endsWith('.svg');
   const size = width + height;
 
-  if (placeholder === undefined && format !== 'svg' && size > 80) {
+  if (placeholder === undefined && !isSvg && size > 80) {
     placeholderVal = 'blur';
   }
 
@@ -47,4 +62,18 @@ export async function Image({
       {...props}
     />
   );
+}
+
+function ClientImage({
+  src,
+  className,
+  sizes = 'auto',
+  placeholder,
+  ...props
+}: TClutchImageProps) {
+  if (typeof src === 'string') {
+    return <img src={src} className={className} {...props} />;
+  }
+
+  return <NextImage src={src} className={className} sizes={sizes} {...props} />;
 }
