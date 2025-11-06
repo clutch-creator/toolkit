@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 3.1.1
+
+### Patch Changes
+
+- cd42f3b: Image support client side rendering
+
 ## 3.1.0
 
 ### Minor Changes
