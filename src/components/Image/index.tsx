@@ -1,8 +1,8 @@
-import NextImage from 'next/image';
+import NextImage, { StaticImageData } from 'next/image';
 import { getImageInfo } from './utils';
 
 type TClutchImageProps = {
-  src: string;
+  src: string | StaticImageData;
   alt: string;
   fill?: boolean;
   sizes?: string;
@@ -37,12 +37,16 @@ async function ServerImage({
   ...props
 }: TClutchImageProps) {
   const imageInfo = typeof src === 'string' ? await getImageInfo(src) : src;
-  const { width, height, format, blurDataURL } = imageInfo;
+  const { width, height, blurDataURL } = imageInfo;
 
   let placeholderVal: PlaceholderValue = placeholder ? 'blur' : 'empty';
+  const isSvg =
+    'format' in imageInfo
+      ? imageInfo.format === 'svg'
+      : imageInfo.src.endsWith('.svg');
   const size = width + height;
 
-  if (placeholder === undefined && format !== 'svg' && size > 80) {
+  if (placeholder === undefined && !isSvg && size > 80) {
     placeholderVal = 'blur';
   }
 
