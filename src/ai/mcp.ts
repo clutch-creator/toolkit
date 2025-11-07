@@ -29,6 +29,10 @@ type TMcpClientOptions = {
   };
 };
 
+/**
+ * Creates an MCP (Model Context Protocol) client with the specified authentication method.
+ * Supports multiple authentication methods including bearer tokens, custom headers, and OAuth.
+ */
 export const createMcpClient = async ({
   url,
   authMethod,
