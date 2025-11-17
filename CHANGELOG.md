@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 3.2.0
+
+### Minor Changes
+
+- 94db048: Added ai sdk input schema to zod raw shape util
+
 ## 3.1.1
 
 ### Patch Changes
