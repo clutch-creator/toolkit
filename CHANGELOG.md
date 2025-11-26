@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 3.3.0
+
+### Minor Changes
+
+- f2de066: Fix cloning Lazy component children
+
 ## 3.2.0
 
 ### Minor Changes
