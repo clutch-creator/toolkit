@@ -136,10 +136,29 @@ export function cloneChildren(
   delete newProps['clutchId'];
 
   const cloneChild = (child: React.ReactNode, index?: number) => {
-    if (React.isValidElement(child)) {
-      const clonedElement = React.cloneElement(child, {
+    let resolvedChild = child;
+
+    // Workaround for React.lazy children until React support cloneChildren with them
+    if (
+      child &&
+      typeof child === 'object' &&
+      '_payload' in child &&
+      child._payload &&
+      typeof child._payload === 'object' &&
+      'status' in child._payload &&
+      child._payload.status === 'fulfilled' &&
+      'value' in child._payload
+    ) {
+      resolvedChild = child._payload.value as React.ReactNode;
+    }
+
+    if (React.isValidElement(resolvedChild)) {
+      const clonedElement = React.cloneElement(resolvedChild, {
         key: index,
-        ...mergeProps((child.props || {}) as Record<string, unknown>, newProps),
+        ...mergeProps(
+          (resolvedChild.props || {}) as Record<string, unknown>,
+          newProps
+        ),
       });
 
       delete newProps.ref;
