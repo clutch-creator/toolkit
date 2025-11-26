@@ -1,7 +1,14 @@
 /* eslint-disable @typescript-eslint/no-unsafe-function-type */
 'use client';
 
-import { useCallback, useContext, useEffect, useMemo, useRef } from 'react';
+import {
+  use,
+  useCallback,
+  useContext,
+  useEffect,
+  useMemo,
+  useRef,
+} from 'react';
 import { cloneChildren, shallowEqual } from '../utils/helpers.js';
 import { useEvent } from '../utils/hooks.js';
 import {
@@ -228,13 +235,27 @@ export const useEventsInstance = (
     [key: string]: unknown;
   }
 ) => {
-  const parenScopeSelection = useScopeSelection();
+  let resolvedChildren: React.ReactNode = children;
+
+  // Resolve React.lazy children until React support cloneChildren with them
+  if (
+    children &&
+    typeof children === 'object' &&
+    '$$typeof' in children &&
+    children.$$typeof === Symbol.for('react.lazy')
+  ) {
+    resolvedChildren = use(
+      (children as unknown as { _payload: Promise<React.ReactNode> })._payload
+    );
+  }
+
+  const parentScopeSelection = useScopeSelection();
   const scopeSelection: TScopeSelection = useMemo(() => {
     return {
-      ...parenScopeSelection,
+      ...parentScopeSelection,
       instanceId: instanceId,
     };
-  }, [parenScopeSelection, instanceId]);
+  }, [parentScopeSelection, instanceId]);
 
   const extraProps: Record<string, unknown> = {};
   const wrappers: React.FunctionComponent<{ children?: React.ReactNode }>[] =
@@ -303,7 +324,7 @@ export const useEventsInstance = (
   };
 
   const render = (events: Record<string, Function>) => {
-    let res = cloneChildren(children, {
+    let res = cloneChildren(resolvedChildren, {
       ...extraProps,
       ...props,
       ...events,

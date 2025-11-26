@@ -138,6 +138,7 @@ export function cloneChildren(
   const cloneChild = (child: React.ReactNode, index?: number) => {
     let resolvedChild = child;
 
+    // Workaround for React.lazy children until React support cloneChildren with them
     if (
       child &&
       typeof child === 'object' &&
