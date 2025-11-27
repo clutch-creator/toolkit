@@ -1,5 +1,11 @@
 # @clutch-creator/toolkit
 
+## 3.3.1
+
+### Patch Changes
+
+- e80575f: fix react 18 compatibility
+
 ## 3.3.0
 
 ### Minor Changes
